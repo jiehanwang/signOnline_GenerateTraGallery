@@ -46,27 +46,26 @@ int _tmain(int argc,char *argv[])
 	//myMatching.CreateGallery();
 	//for (int se = 1; se<5; se++)
 	{
-		sentenceIndex = atoi(argv[1]);//181
+		sentenceIndex = 0;//atoi(argv[1]);//181
 		myMatching.getSentenceIndex(sentenceIndex);
 
 		//Read video for testing. That will be captured by Kinect on-line in the future.
 		Readvideo      myReadVideo;
 		if (sentenceIndex<10)
 		{
-			videoFileName.Format("D:\\iData\\p08_02\\S08_000%d_1_0_20130412.oni",sentenceIndex);
+			videoFileName.Format("D:\\iData\\isolatedWord\\P50\\P50_000%d_1_0_20121002.oni",sentenceIndex);
 		}
 		else if (sentenceIndex<100)
 		{
-			videoFileName.Format("D:\\iData\\p08_02\\S08_00%d_1_0_20130412.oni",sentenceIndex);
+			videoFileName.Format("D:\\iData\\isolatedWord\\P50\\P50_00%d_1_0_20121002.oni",sentenceIndex);
 		}
-		else if (sentenceIndex<226)
+		else if (sentenceIndex<239)
 		{
-			videoFileName.Format("D:\\iData\\p08_02\\S08_0%d_1_0_20130412.oni",sentenceIndex);
+			videoFileName.Format("D:\\iData\\isolatedWord\\P50\\P50_0%d_1_0_20121002.oni",sentenceIndex);
 		}
 		else if (sentenceIndex<1000)
 		{
-			//videoFileName.Format("D:\\iData\\p08_02\\S08_0%d_1_0_20130919.oni",sentenceIndex);
-			videoFileName.Format("D:\\iData\\ydd-s\\S05_0%d_5_0_20130919.oni",sentenceIndex);
+			videoFileName.Format("D:\\iData\\isolatedWord\\P50\\P50_0%d_1_0_20121208.oni",sentenceIndex);
 		}
 
 		string  s   =   (LPCTSTR)videoFileName;
@@ -78,123 +77,22 @@ int _tmain(int argc,char *argv[])
 		myMatching.initial(maxY);
 
 		//The loop
-		//The hidden code is use for generating galleries.
-		//vector<KeyFrameSegment> vKeyFrameAll;
-
-		//ofstream outfile;
-		//outfile.open("..\\time.txt",ios::out);
-		//start = clock();
-// 		ofstream outfile;
-// 		outfile.open("..\\test.txt",ios::out | ios::app);
-// 		outfile<<"sentenceIndex: -----------------"<<sentenceIndex<<endl;
-		ofstream outfile_short;
-		outfile_short.open("..\\totalInfo.csv",ios::out | ios::app);
 		for (i=0; i<framSize; i++)
 		{
-			//start = clock();
-			//cout<<i<<" ";
+
 			skeletonCurrent = myReadVideo.vSkeletonData[i];
-			//depthCurrent    = myReadVideo.vDepthData[i];
-			//frameCurrent    = myReadVideo.vColorData[i];
+			depthCurrent    = myReadVideo.vDepthData[i];
+			frameCurrent    = myReadVideo.vColorData[i];
 			headPoint       = myReadVideo.headPoint3D;
 			myMatching.pushSkeletonData(skeletonCurrent,headPoint);
-			//myMatching.doMatch_record();
-			//myMatching.doMatch_SG();
-// 			int rank[40][topXValue];
-// 			double score[40][topXValue];
-// 
-// 			detectNum = myMatching.onlineDetect(skeletonCurrent, depthCurrent, frameCurrent, headPoint, rank, score);
-// 			
-// 			for (int i=0; i<detectNum; i++)
-// 			{
-// 				cout<<"-----------Got it"<<endl;
-// 				for (int r=0; r<5; r++)
-// 				{
-// 					cout<<rank[i][r]<<" ";
-// 					outfile<<rank[i][r]<<" ";
-// 				}
-// 				cout<<endl;
-// 				outfile<<endl;
-// 			}
-// 			if (detectNum > 0)
-// 			{
-// 				outfile<<endl;
-// 			}
-
-			//durTime=clock()-start;
-			//outfile<<"FrameID: "<<i<<" One frame cost:	"<<durTime<<endl;
+ 			int rank[40][topXValue];
+ 			double score[40][topXValue];
+ 			myMatching.onlineDetect(skeletonCurrent, depthCurrent, frameCurrent, headPoint, rank, score);
 		}
-		//myMatching.doMatch_SG_last();
+
 		myMatching.outPutTrajectoryGallery();
+		myMatching.release();
 
-		//outfile.close();
-
-// 		int rank[40][topXValue];
-// 		double score[40][topXValue];
-// 		int mask[40];
-// 		detectNum = myMatching.release(rank, score, mask);
-// 		cout<<endl<<"The last one or two classes: "<<endl;
-// 		for (int i=0; i<detectNum; i++)
-// 		{
-// 			cout<<"-----------Got it_Final result "<<mask[i]<<" ";
-// 			for (int r=0; r<5; r++)
-// 			{
-// 				cout<<rank[i][r]<<" ";
-// 			}
-// 			cout<<endl;
-// 		}
-// 
-// 		//durTime=clock()-start;
-// 		//double rate = durTime/framSize;
-// 		//cout<<"One frame cost:	"<<durTime<<"/"<<framSize<<" rate "<<rate<<endl;
-// 
-// 		int recall1 = 0;
-// 		int recall5 = 0;
-// 		int ground = 0;
-// 		int preci = 0;
-// 
-// 		ground = myMatching.groundTruth[sentenceIndex].size();
-// 		preci = detectNum;
-// 
-// 		for (int i=0; i<detectNum; i++)
-// 		{
-// 			if (mask[i] == 0)
-// 			{
-// 				preci--;
-// 			}
-// 		}
-// 
-// 		for (int i=0; i<detectNum; i++)
-// 		{
-// 			for (int j=0; j<ground; j++)
-// 			{
-// 				if (mask[i] == 1
-// 					&& rank[i][0] == myMatching.groundTruth[sentenceIndex][j])
-// 				{
-// 					recall1++;
-// 				}
-// 				for (int k=0; k<topXValue; k++)
-// 				{
-// 					if (mask[i] == 1
-// 						&& rank[i][k] == myMatching.groundTruth[sentenceIndex][j])
-// 					{
-// 						recall5++;
-// 						break;
-// 					}
-// 				}
-// 				
-// 			}
-// // 			if (mask[i] == 1)
-// // 			{
-// // 				recall1++;
-// // 			}
-// // 			if (mask[i]>0)
-// // 			{
-// // 				recall5++;
-// // 			}
-// 		}
-// 		outfile_short<<sentenceIndex<<","<<recall1<<","<<(recall5>ground?ground:recall5)<<","<<ground<<","<<preci<<endl;
-// 		outfile_short.close();
 	}
 	
  	cout<<endl<<"done"<<endl;

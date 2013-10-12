@@ -4097,41 +4097,7 @@ int S_CMatching::onlineDetect(SLR_ST_Skeleton skeletonCurrent, Mat depthCurrent,
 			KeyFrameSegment tempSegment = myKeyframe.getFragment();															 
 			cout<<endl<<"KeyFrame: Begin ID-"<<tempSegment.BeginFrameID														 
 				<<" End ID-"<<tempSegment.EndFrameID<<endl;	
-			//////////////////////////////////////////////////////////////////////////
-#ifdef generateGalleryKey
-			vKeyFrameAll.push_back(tempSegment);
-#endif
-
-#ifdef svmTrainKey
-			vKeyFrameAllSVM.push_back(tempSegment);
-#endif
-			//////////////////////////////////////////////////////////////////////////	
-#ifndef generateGalleryKey
-			//Select the best key frame form key frame candidates. 														 
-			//"sentenceIndex" is used for save key frames. It should be deleted later.									 
-			M_myPostures.keyFrameSelect(tempSegment.RightImages,tempSegment.LeftImages,tempSegment.BothImages,				 
-				tempSegment.RightNum, tempSegment.LeftNum, tempSegment.BothNum,												 
-				tempSegment.BeginFrameID, tempSegment.EndFrameID,sentenceIndex);											 
-
-			//Compute its feature.																						 
-			M_myPostures.featureCalPosture();																					 
-
-			//Updating and do the matching																				 
-			matchUpdate(M_myPostures.keyFeatureStream, tempSegment.BeginFrameID,tempSegment.EndFrameID);			 
-			//detectSignClass = doMatch();
-			doMatch_record();
-			//detectSignClass = doMatch_SG(rank,score, detectNum);
-			detectNum = doMatch_SG(rank,score, detectNum);
-			//Release memory for key frame candidates.		
-			#ifndef svmTrainKey
-			myKeyframe.releaseFragment(tempSegment);	
-			#endif
-
-// 			if (detectSignClass > -1)
-// 			{
-// 				detectNum++;
-// 			}
-#endif
+			SegEnd.push_back(tempSegment.EndFrameID);
 		}																													 
 	}	
 	return detectNum;
@@ -4939,22 +4905,20 @@ currentRank S_CMatching::rankReRank(streamMatch src, int style)
 
 void S_CMatching::outPutTrajectoryGallery(void)
 {
-	//manuallySegTest(sentenceIndex);
-	
 	CString  FileName_tra;
-
 	ofstream outfile_tra;
+		//For the whole trajectory
 	if (sentenceIndex<10)
 	{
-		FileName_tra.Format("..\\traGallery\\G_000%d.txt",sentenceIndex);
+		FileName_tra.Format("..\\traGallery\\S_000%d.txt",sentenceIndex);
 	}
 	else if (sentenceIndex<100)
 	{
-		FileName_tra.Format("..\\traGallery\\G_00%d.txt",sentenceIndex);
+		FileName_tra.Format("..\\traGallery\\S_00%d.txt",sentenceIndex);
 	}
 	else if (sentenceIndex<1000)
 	{
-		FileName_tra.Format("..\\traGallery\\G_0%d.txt",sentenceIndex);
+		FileName_tra.Format("..\\traGallery\\S_0%d.txt",sentenceIndex);
 	}
 	//FileName_tra.Format("..\\traGallery\\G_%d.txt",sentenceIndex);
 	outfile_tra.open(FileName_tra,ios::out);
@@ -4971,6 +4935,45 @@ void S_CMatching::outPutTrajectoryGallery(void)
 			<<(int)(M_SkeletonData[j]._3dPoint[11].z*1000)<<endl;
 	}
 	outfile_tra.close();
+
+		//For each state. 
+	for (int i=0; i<SegEnd.size(); i++)
+	{
+		//manuallySegTest(sentenceIndex);
+
+		
+		if (sentenceIndex<10)
+		{
+			FileName_tra.Format("..\\traGallery\\S_000%d_%d.txt",sentenceIndex,i);
+		}
+		else if (sentenceIndex<100)
+		{
+			FileName_tra.Format("..\\traGallery\\S_00%d_%d.txt",sentenceIndex,i);
+		}
+		else if (sentenceIndex<1000)
+		{
+			FileName_tra.Format("..\\traGallery\\S_0%d_%d.txt",sentenceIndex,i);
+		}
+		//FileName_tra.Format("..\\traGallery\\G_%d.txt",sentenceIndex);
+		outfile_tra.open(FileName_tra,ios::out);
+		outfile_tra<<(int)(M_HeadPoint3D[sentenceIndex].x*1000)<<'\t'
+			<<(int)(M_HeadPoint3D[sentenceIndex].y*1000)<<'\t'
+			<<(int)(M_HeadPoint3D[sentenceIndex].z*1000)<<endl;
+		//for (int j=0; j<M_SkeletonData.size(); j++)
+		for (int j=0; j<SegEnd[i]; j++)
+		{
+			outfile_tra<<(int)(M_SkeletonData[j]._3dPoint[7].x*1000)<<'\t'
+				<<(int)(M_SkeletonData[j]._3dPoint[7].y*1000)<<'\t'
+				<<(int)(M_SkeletonData[j]._3dPoint[7].z*1000)<<'\t'
+				<<(int)(M_SkeletonData[j]._3dPoint[11].x*1000)<<'\t'
+				<<(int)(M_SkeletonData[j]._3dPoint[11].y*1000)<<'\t'
+				<<(int)(M_SkeletonData[j]._3dPoint[11].z*1000)<<endl;
+		}
+		
+		outfile_tra.close();
+	}
+
+	
 }
 
 
