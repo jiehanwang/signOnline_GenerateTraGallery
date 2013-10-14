@@ -46,7 +46,7 @@ int _tmain(int argc,char *argv[])
 	//myMatching.CreateGallery();
 	//for (int se = 1; se<5; se++)
 	{
-		sentenceIndex = 0;//atoi(argv[1]);//181
+		sentenceIndex = atoi(argv[1]);//181
 		myMatching.getSentenceIndex(sentenceIndex);
 
 		//Read video for testing. That will be captured by Kinect on-line in the future.

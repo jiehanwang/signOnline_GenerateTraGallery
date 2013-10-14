@@ -4905,73 +4905,124 @@ currentRank S_CMatching::rankReRank(streamMatch src, int style)
 
 void S_CMatching::outPutTrajectoryGallery(void)
 {
-	CString  FileName_tra;
+		//Record the head positions. 
+	ofstream outfile_head;
+	outfile_head.open("..\\traGallery\\HeadPosition.dat", ios::binary | ios::app | ios::out);
+	int headX = (int)(M_HeadPoint3D[0].x*1000);
+	int headY = (int)(M_HeadPoint3D[0].y*1000);
+	int headZ = (int)(M_HeadPoint3D[0].z*1000);
+	outfile_head.write((char*)&headX, sizeof(headX));
+	outfile_head.write((char*)&headY, sizeof(headY));
+	outfile_head.write((char*)&headZ, sizeof(headZ));
+	outfile_head.close();
+
+		//Record the hand positions. 
 	ofstream outfile_tra;
-		//For the whole trajectory
-	if (sentenceIndex<10)
-	{
-		FileName_tra.Format("..\\traGallery\\S_000%d.txt",sentenceIndex);
-	}
-	else if (sentenceIndex<100)
-	{
-		FileName_tra.Format("..\\traGallery\\S_00%d.txt",sentenceIndex);
-	}
-	else if (sentenceIndex<1000)
-	{
-		FileName_tra.Format("..\\traGallery\\S_0%d.txt",sentenceIndex);
-	}
-	//FileName_tra.Format("..\\traGallery\\G_%d.txt",sentenceIndex);
-	outfile_tra.open(FileName_tra,ios::out);
-	outfile_tra<<(int)(M_HeadPoint3D[sentenceIndex].x*1000)<<'\t'
-		<<(int)(M_HeadPoint3D[sentenceIndex].y*1000)<<'\t'
-		<<(int)(M_HeadPoint3D[sentenceIndex].z*1000)<<endl;
+	outfile_tra.open("..\\traGallery\\Trajectory.dat", ios::binary | ios::app | ios::out);
 	for (int j=0; j<M_SkeletonData.size(); j++)
 	{
-		outfile_tra<<(int)(M_SkeletonData[j]._3dPoint[7].x*1000)<<'\t'
-			<<(int)(M_SkeletonData[j]._3dPoint[7].y*1000)<<'\t'
-			<<(int)(M_SkeletonData[j]._3dPoint[7].z*1000)<<'\t'
-			<<(int)(M_SkeletonData[j]._3dPoint[11].x*1000)<<'\t'
-			<<(int)(M_SkeletonData[j]._3dPoint[11].y*1000)<<'\t'
-			<<(int)(M_SkeletonData[j]._3dPoint[11].z*1000)<<endl;
+		int leftX = (int)(M_SkeletonData[j]._3dPoint[7].x*1000);
+		int leftY = (int)(M_SkeletonData[j]._3dPoint[7].y*1000);
+		int leftZ = (int)(M_SkeletonData[j]._3dPoint[7].z*1000);
+		int rightX = (int)(M_SkeletonData[j]._3dPoint[11].x*1000);
+		int rightY = (int)(M_SkeletonData[j]._3dPoint[11].y*1000);
+		int rightZ = (int)(M_SkeletonData[j]._3dPoint[11].z*1000);
+		outfile_tra.write((char*)&leftX,sizeof(leftX));
+		outfile_tra.write((char*)&leftY,sizeof(leftY));
+		outfile_tra.write((char*)&leftZ,sizeof(leftZ));
+		outfile_tra.write((char*)&rightX,sizeof(rightX));
+		outfile_tra.write((char*)&rightY,sizeof(rightY));
+		outfile_tra.write((char*)&rightZ,sizeof(rightZ));
 	}
 	outfile_tra.close();
 
-		//For each state. 
+		//Record the label. 
+	ofstream outfile_label;
+	outfile_label.open("..\\traGallery\\LabelForTra.dat", ios::binary | ios::app | ios::out);
+	outfile_label.write((char*)&sentenceIndex, sizeof(sentenceIndex));
+	int frameNum = M_SkeletonData.size();
+	outfile_label.write((char*)&frameNum, sizeof(frameNum));
+	int segNum = SegEnd.size()+1; //"+1" for the whole trajectory, the last one.
+	outfile_label.write((char*)&segNum, sizeof(segNum));
+
 	for (int i=0; i<SegEnd.size(); i++)
 	{
-		//manuallySegTest(sentenceIndex);
-
-		
-		if (sentenceIndex<10)
-		{
-			FileName_tra.Format("..\\traGallery\\S_000%d_%d.txt",sentenceIndex,i);
-		}
-		else if (sentenceIndex<100)
-		{
-			FileName_tra.Format("..\\traGallery\\S_00%d_%d.txt",sentenceIndex,i);
-		}
-		else if (sentenceIndex<1000)
-		{
-			FileName_tra.Format("..\\traGallery\\S_0%d_%d.txt",sentenceIndex,i);
-		}
-		//FileName_tra.Format("..\\traGallery\\G_%d.txt",sentenceIndex);
-		outfile_tra.open(FileName_tra,ios::out);
-		outfile_tra<<(int)(M_HeadPoint3D[sentenceIndex].x*1000)<<'\t'
-			<<(int)(M_HeadPoint3D[sentenceIndex].y*1000)<<'\t'
-			<<(int)(M_HeadPoint3D[sentenceIndex].z*1000)<<endl;
-		//for (int j=0; j<M_SkeletonData.size(); j++)
-		for (int j=0; j<SegEnd[i]; j++)
-		{
-			outfile_tra<<(int)(M_SkeletonData[j]._3dPoint[7].x*1000)<<'\t'
-				<<(int)(M_SkeletonData[j]._3dPoint[7].y*1000)<<'\t'
-				<<(int)(M_SkeletonData[j]._3dPoint[7].z*1000)<<'\t'
-				<<(int)(M_SkeletonData[j]._3dPoint[11].x*1000)<<'\t'
-				<<(int)(M_SkeletonData[j]._3dPoint[11].y*1000)<<'\t'
-				<<(int)(M_SkeletonData[j]._3dPoint[11].z*1000)<<endl;
-		}
-		
-		outfile_tra.close();
+		int segFrames = SegEnd[i]-1;  //The frame index of the end of the segmentation.
+		outfile_label.write((char*)&segFrames, sizeof(segFrames));
 	}
+	frameNum -= 1;
+	outfile_label.write((char*)&frameNum, sizeof(frameNum));
+	outfile_label.close();
+	
+
+
+
+		//CString  FileName_tra;
+// 		//For the whole trajectory
+// 	if (sentenceIndex<10)
+// 	{
+// 		FileName_tra.Format("..\\traGallery\\S_000%d.txt",sentenceIndex);
+// 	}
+// 	else if (sentenceIndex<100)
+// 	{
+// 		FileName_tra.Format("..\\traGallery\\S_00%d.txt",sentenceIndex);
+// 	}
+// 	else if (sentenceIndex<1000)
+// 	{
+// 		FileName_tra.Format("..\\traGallery\\S_0%d.txt",sentenceIndex);
+// 	}
+// 	//FileName_tra.Format("..\\traGallery\\G_%d.txt",sentenceIndex);
+// 	outfile_tra.open(FileName_tra,ios::out);
+// 	outfile_tra<<(int)(M_HeadPoint3D[sentenceIndex].x*1000)<<'\t'
+// 		<<(int)(M_HeadPoint3D[sentenceIndex].y*1000)<<'\t'
+// 		<<(int)(M_HeadPoint3D[sentenceIndex].z*1000)<<endl;
+// 	for (int j=0; j<M_SkeletonData.size(); j++)
+// 	{
+// 		outfile_tra<<(int)(M_SkeletonData[j]._3dPoint[7].x*1000)<<'\t'
+// 			<<(int)(M_SkeletonData[j]._3dPoint[7].y*1000)<<'\t'
+// 			<<(int)(M_SkeletonData[j]._3dPoint[7].z*1000)<<'\t'
+// 			<<(int)(M_SkeletonData[j]._3dPoint[11].x*1000)<<'\t'
+// 			<<(int)(M_SkeletonData[j]._3dPoint[11].y*1000)<<'\t'
+// 			<<(int)(M_SkeletonData[j]._3dPoint[11].z*1000)<<endl;
+// 	}
+// 	outfile_tra.close();
+// 
+// 		//For each state. 
+// 	for (int i=0; i<SegEnd.size(); i++)
+// 	{
+// 		//manuallySegTest(sentenceIndex);
+// 
+// 		
+// 		if (sentenceIndex<10)
+// 		{
+// 			FileName_tra.Format("..\\traGallery\\S_000%d_%d.txt",sentenceIndex,i);
+// 		}
+// 		else if (sentenceIndex<100)
+// 		{
+// 			FileName_tra.Format("..\\traGallery\\S_00%d_%d.txt",sentenceIndex,i);
+// 		}
+// 		else if (sentenceIndex<1000)
+// 		{
+// 			FileName_tra.Format("..\\traGallery\\S_0%d_%d.txt",sentenceIndex,i);
+// 		}
+// 		//FileName_tra.Format("..\\traGallery\\G_%d.txt",sentenceIndex);
+// 		outfile_tra.open(FileName_tra,ios::out);
+// 		outfile_tra<<(int)(M_HeadPoint3D[sentenceIndex].x*1000)<<'\t'
+// 			<<(int)(M_HeadPoint3D[sentenceIndex].y*1000)<<'\t'
+// 			<<(int)(M_HeadPoint3D[sentenceIndex].z*1000)<<endl;
+// 		//for (int j=0; j<M_SkeletonData.size(); j++)
+// 		for (int j=0; j<SegEnd[i]; j++)
+// 		{
+// 			outfile_tra<<(int)(M_SkeletonData[j]._3dPoint[7].x*1000)<<'\t'
+// 				<<(int)(M_SkeletonData[j]._3dPoint[7].y*1000)<<'\t'
+// 				<<(int)(M_SkeletonData[j]._3dPoint[7].z*1000)<<'\t'
+// 				<<(int)(M_SkeletonData[j]._3dPoint[11].x*1000)<<'\t'
+// 				<<(int)(M_SkeletonData[j]._3dPoint[11].y*1000)<<'\t'
+// 				<<(int)(M_SkeletonData[j]._3dPoint[11].z*1000)<<endl;
+// 		}
+// 		
+// 		outfile_tra.close();
+// 	}
 
 	
 }
