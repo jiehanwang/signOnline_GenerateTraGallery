@@ -4094,7 +4094,8 @@ int S_CMatching::onlineDetect(SLR_ST_Skeleton skeletonCurrent, Mat depthCurrent,
 		while(myKeyframe.isThereFragment())																					 
 		{	
 			//Get key frame candidates.																					 
-			KeyFrameSegment tempSegment = myKeyframe.getFragment();															 
+			KeyFrameSegment tempSegment = myKeyframe.getFragment();		
+			v_kfSegment.push_back(tempSegment);
 			cout<<endl<<"KeyFrame: Begin ID-"<<tempSegment.BeginFrameID														 
 				<<" End ID-"<<tempSegment.EndFrameID<<endl;	
 			SegEnd.push_back(tempSegment.EndFrameID);
@@ -4905,6 +4906,26 @@ currentRank S_CMatching::rankReRank(streamMatch src, int style)
 
 void S_CMatching::outPutTrajectoryGallery(void)
 {
+		//
+	CString fileName;
+	if (sentenceIndex<10)
+	{
+		fileName.Format("..\\posGallery\\000%d",sentenceIndex);
+	}
+	else if (sentenceIndex<100)
+	{
+		fileName.Format("..\\posGallery\\00%d",sentenceIndex);
+	}
+	else if (sentenceIndex<1000)
+	{
+		fileName.Format("..\\posGallery\\0%d",sentenceIndex);
+	}
+
+	mkdir(fileName);
+	string strStl; 
+	strStl=fileName.GetBuffer(0);
+	myKeyframe.saveKeyFrameSegment(strStl,v_kfSegment);
+
 		//Record the head positions. 
 	ofstream outfile_head;
 	outfile_head.open("..\\traGallery\\HeadPosition.dat", ios::binary | ios::app | ios::out);

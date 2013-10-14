@@ -58,6 +58,11 @@ struct KeyFrameSegment
 	IplImage** BothImages;	//双手图片
 	IplImage** LeftImages;	//双手图片
 	IplImage** RightImages;	//双手图片
+
+	int* BothDepth;			//每张双手分割图片深度
+	int* LeftDepth;			//每张左手分割图片深度
+	int* RightDepth;		//每张右手分割图片深度
+
 };
 
 enum HANDTYPE

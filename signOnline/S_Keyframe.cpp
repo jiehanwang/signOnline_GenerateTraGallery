@@ -32,6 +32,8 @@ S_Keyframe::S_Keyframe()
 		rightFlag[i]=false;
 		bothFlag[i]=false;
 	}
+	//floodFillX=new int[100000];
+	//floodFillY=new int[100000];
 }
 
 S_Keyframe::S_Keyframe(vector<SLR_ST_Skeleton> SkeletonData,vector<Mat> DepthData, vector<IplImage*> ColorData)
@@ -147,6 +149,9 @@ S_Keyframe::~S_Keyframe(void)
 	DeleteCriticalSection(&csFrameData);
 	DeleteCriticalSection(&csFragmentData);
 	DeleteCriticalSection(&csMessageData);
+
+	//delete[] floodFillX;
+	//delete[] floodFillY;
 }
 
 void S_Keyframe::deleteHandStruct(HandSegment handStruct)
@@ -233,7 +238,7 @@ void S_Keyframe::KeyframeExtractionOnline()
 	{
 		if(processedFrameNum == framesNum)
 		{
-			Sleep(30);
+			Sleep(5);
 			continue;
 		}
 		//cout<<processedFrameNum<<endl;
@@ -592,6 +597,7 @@ void S_Keyframe::putInFragment(KeyFrameSegment &Fragment,FrameSegment &fs ,int f
 		Fragment.BothCoor[Fragment.BothNum*2+1]=fs.bothCoor[1];
 		Fragment.BothID[Fragment.BothNum]=frameID;
 		Fragment.BothImages[Fragment.BothNum]=fs.bothImage;
+		Fragment.BothDepth[Fragment.BothNum]=fs.bothDepth;
 		Fragment.BothNum++;
 	}
 
@@ -601,6 +607,7 @@ void S_Keyframe::putInFragment(KeyFrameSegment &Fragment,FrameSegment &fs ,int f
 		Fragment.LeftCoor[Fragment.LeftNum*2+1]=fs.leftCoor[1];
 		Fragment.LeftID[Fragment.LeftNum]=frameID;
 		Fragment.LeftImages[Fragment.LeftNum]=fs.leftImage;
+		Fragment.LeftDepth[Fragment.LeftNum]=fs.leftDepth;
 		Fragment.LeftNum++;
 	}
 
@@ -610,6 +617,7 @@ void S_Keyframe::putInFragment(KeyFrameSegment &Fragment,FrameSegment &fs ,int f
 		Fragment.RightCoor[Fragment.RightNum*2+1]=fs.rightCoor[1];
 		Fragment.RightID[Fragment.RightNum]=frameID;
 		Fragment.RightImages[Fragment.RightNum]=fs.rightImage;
+		Fragment.RightDepth[Fragment.RightNum]=fs.rightDepth;
 		Fragment.RightNum++;
 	}
 	Fragment.EndFrameID=frameID;
@@ -629,6 +637,10 @@ void S_Keyframe::CreateNewFragment(KeyFrameSegment &Fragment)
 	Fragment.BothImages=new IplImage*[maxFrameNum];
 	Fragment.LeftImages=new IplImage*[maxFrameNum];
 	Fragment.RightImages=new IplImage*[maxFrameNum];
+
+	Fragment.BothDepth=new int[maxFrameNum];
+	Fragment.LeftDepth=new int[maxFrameNum];
+	Fragment.RightDepth=new int[maxFrameNum];
 
 	Fragment.BothNum=0;
 	Fragment.LeftNum=0;
@@ -883,6 +895,32 @@ void S_Keyframe::handSegment(int frameID)
 
 void S_Keyframe::getFrameSegment(int frameID,FrameSegment& fs)
 {
+	//IplImage* maskImage;
+	//maskImage=cvCreateImage(cvSize(vColorData[frameID%bufferSize]->width,vColorData[frameID%bufferSize]->height),8,1);
+	//cvZero(maskImage);
+	//CvMat myMat;
+	//myMat = vDepthData[frameID%bufferSize];
+	//IplImage* tempDepth=cvCreateImage(cvGetSize(myMat),16,1);
+	//cvGetImage(myMat,tempDepth);
+	//IplImage* tempDepth=vDepthData[frameID%bufferSize];
+//	depthFloodFill(maskImage,vDepthData[frameID%bufferSize],cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[0].x,vSkeletonData[frameID%bufferSize]._2dPoint[0].y));
+//	depthFloodFill(maskImage,vDepthData[frameID%bufferSize],cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[1].x,vSkeletonData[frameID%bufferSize]._2dPoint[1].y));
+	
+	//cvFloodFill(tempDepth,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[2].x,vSkeletonData[frameID%bufferSize]._2dPoint[2].y),
+	//	cvRealScalar(255),cvRealScalar(50),cvRealScalar(50),NULL,CV_FLOODFILL_MASK_ONLY | 4,maskImage);
+	//cvFloodFill(tempDepth,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[3].x,vSkeletonData[frameID%bufferSize]._2dPoint[3].y),
+	//	cvRealScalar(255),cvRealScalar(50),cvRealScalar(50),NULL,CV_FLOODFILL_MASK_ONLY | 4,maskImage);
+	//depthFloodFill(maskImage,vDepthData[frameID%bufferSize],cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[2].x,vSkeletonData[frameID%bufferSize]._2dPoint[2].y));
+	//depthFloodFill(maskImage,vDepthData[frameID%bufferSize],cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[3].x,vSkeletonData[frameID%bufferSize]._2dPoint[3].y));
+//	cvCircle(maskImage,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[0].x,vSkeletonData[frameID%bufferSize]._2dPoint[0].y),5,cvScalar(255,255,255),5);
+//	cvCircle(maskImage,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[1].x,vSkeletonData[frameID%bufferSize]._2dPoint[1].y),5,cvScalar(255,255,255),5);
+	//cvCircle(maskImage,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[2].x,vSkeletonData[frameID%bufferSize]._2dPoint[2].y),5,cvScalar(255,255,255),5);
+	//cvCircle(maskImage,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[3].x,vSkeletonData[frameID%bufferSize]._2dPoint[3].y),5,cvScalar(255,255,255),5);
+	//char name[100];
+	//sprintf(name,"FloodFill\\%03d.jpg",frameID);
+	//cvSaveImage(name,maskImage);
+	//cvReleaseImage(&maskImage);
+	
 	IplImage* grayImage;
 	grayImage=cvCreateImage(cvSize(vColorData[frameID%bufferSize]->width,vColorData[frameID%bufferSize]->height),vColorData[frameID%bufferSize]->depth,1);
 	//if(frameID==351)
@@ -901,6 +939,25 @@ void S_Keyframe::getFrameSegment(int frameID,FrameSegment& fs)
 	int theBox[100];
 	int nThreshold=300;
 	getConnexeCenterBox(binaryImage, nMaxRect, theCent, theBox, nThreshold);
+	/*IplImage* tempBinary=cvCreateImage(cvSize(binaryImage->width,binaryImage->height),binaryImage->depth,binaryImage->nChannels);
+	for(int i=0;i<binaryImage->height;i++)
+	{
+		for(int j=0;j<binaryImage->width;j++)
+		{
+			if(((char*)(binaryImage->imageData + binaryImage->widthStep*i))[j] > 0)
+			{
+				((char*)(tempBinary->imageData + tempBinary->widthStep*i))[j] = 255;
+			}
+			else
+				((char*)(tempBinary->imageData + tempBinary->widthStep*i))[j] = 0;
+		}
+	}
+	cvCircle(tempBinary,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[7].x,vSkeletonData[frameID%bufferSize]._2dPoint[7].y),5,cvScalar(125,125,125),5);
+	cvCircle(tempBinary,cvPoint(vSkeletonData[frameID%bufferSize]._2dPoint[11].x,vSkeletonData[frameID%bufferSize]._2dPoint[11].y),5,cvScalar(125,125,125),5);
+	char name[100];
+	sprintf(name,"FloodFill\\Binary%03d.jpg",frameID);
+	cvSaveImage(name,tempBinary);
+	cvReleaseImage(&tempBinary);*/
 	/*if(frameID==351)
 		cvSaveImage("binaryImage2.jpg",binaryImage);*/
 	cvDilate(binaryImage,binaryImage);
@@ -918,7 +975,8 @@ void S_Keyframe::getFrameSegment(int frameID,FrameSegment& fs)
 	fs.right=false;
 	//if(frameID==351)
 	//	cout<<"get hand image begin"<<endl;
-	getHandImage(frameID,binaryImage,nMaxRect,theCent,theBox,grayImage,fs);
+	//getHandImage(frameID,binaryImage,nMaxRect,theCent,theBox,grayImage,fs);
+	getHandImage(frameID,binaryImage,nMaxRect,theCent,theBox,fs);
 	//if(frameID==351)
 	//{
 	//	cout<<"get hand image end"<<endl;
@@ -1089,12 +1147,18 @@ void S_Keyframe::getFaceRect(int frameID)
 	if(height > 20 && width > 20)
 		initFaceRect= Rect(topX, topY, width, height);
 
-// 	cvSetImageROI(vColorData[frameID%bufferSize],cvRect(topX,topY,width,height));
-// 	IplImage* faceImage=cvCreateImage(cvSize(width,height),vColorData[frameID%bufferSize]->depth,vColorData[frameID%bufferSize]->nChannels);
-// 	cvCopy(vColorData[frameID%bufferSize],faceImage);
-// 	getSkinColorModel(faceImage);
-// 	cvReleaseImage(&faceImage);
-// 	cvResetImageROI(vColorData[frameID%bufferSize]);
+	//if(frameID==0)
+	//{
+	//	cvSetImageROI(vColorData[frameID%bufferSize],cvRect(topX,topY,width,height));
+	//	IplImage* faceImage=cvCreateImage(cvSize(width,height),vColorData[frameID%bufferSize]->depth,vColorData[frameID%bufferSize]->nChannels);
+	//	cvCopy(vColorData[frameID%bufferSize],faceImage);
+	//	//getSkinColorModel(faceImage);
+	//	skinHist=getSkinColorHist(faceImage);
+	//	cvReleaseImage(&faceImage);
+	//	cvResetImageROI(vColorData[frameID%bufferSize]);
+	//	cvRectangle(vColorData[frameID],cvPoint(topX+width/5,topY+height*1/2),cvPoint(topX+width*3/5,topY+height*5/6),cvScalar(0,0,0));
+	//	cvSaveImage("headDect.jpg",vColorData[frameID]);
+	//}
 
 	//cvRectangle(vColorData[frameID],cvPoint(topX,topY),cvPoint(topX+width,topY+height),cvScalar(0,0,0));
 	//cvSaveImage("headDect.jpg",vColorData[frameID]);
@@ -1136,6 +1200,7 @@ void S_Keyframe::depthRestrict(int frameID, IplImage* grayImage)
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
 			else if(!isSkinColorModel(vColorData[frameID%bufferSize],i,j))
+			//else if(!isSkinColorHist(vColorData[frameID%bufferSize],i,j,0.5))
 			{
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
@@ -1152,6 +1217,7 @@ void S_Keyframe::depthRestrict(int frameID, IplImage* grayImage)
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
 			else if(!isSkinColorModel(vColorData[frameID%bufferSize],i,j))
+			//else if(!isSkinColorHist(vColorData[frameID%bufferSize],i,j,0.5))
 			{
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
@@ -1168,6 +1234,7 @@ void S_Keyframe::depthRestrict(int frameID, IplImage* grayImage)
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
 			else if(!isSkinColorModel(vColorData[frameID%bufferSize],i,j))
+			//else if(!isSkinColorHist(vColorData[frameID%bufferSize],i,j,0.5))
 			{
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
@@ -1184,6 +1251,7 @@ void S_Keyframe::depthRestrict(int frameID, IplImage* grayImage)
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
 			else if(!isSkinColorModel(vColorData[frameID%bufferSize],i,j))
+			//else if(!isSkinColorHist(vColorData[frameID%bufferSize],i,j,0.5))
 			{
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
@@ -1200,6 +1268,7 @@ void S_Keyframe::depthRestrict(int frameID, IplImage* grayImage)
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
 			else if(!isSkinColorModel(vColorData[frameID%bufferSize],i,j))
+			//else if(!isSkinColorHist(vColorData[frameID%bufferSize],i,j,0.5))
 			{
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
@@ -1216,6 +1285,7 @@ void S_Keyframe::depthRestrict(int frameID, IplImage* grayImage)
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
 			else if(!isSkinColorModel(vColorData[frameID%bufferSize],i,j))
+			//else if(!isSkinColorHist(vColorData[frameID%bufferSize],i,j,0.5))
 			{
 				((char*)(grayImage->imageData + grayImage->widthStep*i))[j] = 0;
 			}
@@ -1231,6 +1301,11 @@ void S_Keyframe::depthRestrict(int frameID, IplImage* grayImage)
 		}
 	}
 	//cvSaveImage("7testColor.jpg",grayImage);
+
+	//skinFloodFill(grayImage,vDepthData[frameID%bufferSize],frameID);
+	//char name[100];
+	//sprintf(name,"FloodFill\\skin%03d.jpg",frameID);
+	//cvSaveImage(name,grayImage);
 }
 
 void S_Keyframe::skinColorProcess(IplImage* colorImage)
@@ -1297,7 +1372,7 @@ void S_Keyframe::getConnexeCenterBox(IplImage* image, int& nMaxRect, int* theCen
 		}
 	}
 
-	int nMax = 2;
+	int nMax = 5;
 	int bufferDims[3] = { image->width,image->height, 1 };
 	Connexe_SetMinimumSizeOfComponents( nThreshold);		// original is set to 1;
 	Connexe_SetMaximumNumberOfComponents( nMax );		// original is set to 1;
@@ -1925,6 +2000,156 @@ void S_Keyframe::getHandImage(int frameID,IplImage* binaryImage, int& nMaxRect, 
 	}
 }
 
+void S_Keyframe::getHandImage(int frameID,IplImage* binaryImage, int& nMaxRect, int* theCent, int* theBox,FrameSegment& fs)
+{
+	int leftMinIdx,rightMinIdx;
+	double rightDis=1000;
+	double leftDis=1000;
+	
+	CvPoint2D32f rightPoint,leftPoint,connexePoint;
+	rightPoint.x=vSkeletonData[frameID%bufferSize]._2dPoint[11].x;
+	rightPoint.y=vSkeletonData[frameID%bufferSize]._2dPoint[11].y;
+
+	leftPoint.x=vSkeletonData[frameID%bufferSize]._2dPoint[7].x;
+	leftPoint.y=vSkeletonData[frameID%bufferSize]._2dPoint[7].y;
+
+	if(calDist(rightPoint,leftPoint) < 80)
+	{
+		rightPoint.x=vSkeletonData[frameID%bufferSize]._2dPoint[10].x;
+		rightPoint.y=vSkeletonData[frameID%bufferSize]._2dPoint[10].y;
+
+		leftPoint.x=vSkeletonData[frameID%bufferSize]._2dPoint[6].x;
+		leftPoint.y=vSkeletonData[frameID%bufferSize]._2dPoint[6].y;
+	}
+	
+	for(int i=0;i<nMaxRect;i++)
+	{
+		CvPoint2D32f connexePoint;
+		connexePoint.x=theCent[i*2];
+		connexePoint.y=theCent[i*2+1];
+
+		if(calDist(rightPoint,connexePoint) < rightDis)
+		{
+			rightDis=calDist(rightPoint,connexePoint);
+			rightMinIdx=i+1;
+		}
+		if(calDist(leftPoint,connexePoint) < leftDis)
+		{
+			leftDis=calDist(leftPoint,connexePoint);
+			leftMinIdx=i+1;
+		}
+	}
+	if(leftMinIdx==rightMinIdx && leftDis<80 && rightDis<80)
+	{
+		double secondLeftDis=1000;
+		double secondRightDis=1000;
+		int rightSecondIdx,leftSecondIdx;
+		for(int i=0;i<nMaxRect;i++)
+		{
+			CvPoint2D32f connexePoint;
+			connexePoint.x=theCent[i*2];
+			connexePoint.y=theCent[i*2+1];
+
+			if(rightMinIdx!=i+1)
+			{
+				if(calDist(rightPoint,connexePoint) < secondRightDis)
+				{
+					secondRightDis=calDist(rightPoint,connexePoint);
+					rightSecondIdx=i+1;
+				}
+			}
+			
+			if(leftMinIdx!=i+1)
+			{
+				if(calDist(leftPoint,connexePoint) < secondLeftDis)
+				{
+					secondLeftDis=calDist(leftPoint,connexePoint);
+					leftSecondIdx=i+1;
+				}
+			}
+		}
+		if(secondRightDis<secondLeftDis && secondRightDis<50)
+		{
+			IplImage* handImage=getConnextImage(binaryImage,theBox+4*(rightSecondIdx-1),rightSecondIdx,frameID);
+			saveHandImage(handImage,frameID, RIGHT, Point(*(theBox+4*(rightSecondIdx-1)),*(theBox+4*(rightSecondIdx-1)+1)) ,fs);
+			cvReleaseImage(&handImage);
+			return ;
+		}
+		if(secondRightDis > secondLeftDis && secondLeftDis<50)
+		{
+			IplImage* handImage=getConnextImage(binaryImage,theBox+4*(leftSecondIdx-1),leftSecondIdx,frameID);
+			saveHandImage(handImage,frameID, LEFT, Point(*(theBox+4*(leftSecondIdx-1)),*(theBox+4*(leftSecondIdx-1)+1)) ,fs);
+			cvReleaseImage(&handImage);
+			return ;
+		}
+		IplImage* handImage=getConnextImage(binaryImage,theBox+4*(leftMinIdx-1),leftMinIdx,frameID);
+		saveHandImage(handImage,frameID, BOTH, Point(*(theBox+4*(leftMinIdx-1)),*(theBox+4*(leftMinIdx-1)+1)) ,fs);
+		cvReleaseImage(&handImage);
+	}
+	else
+	{
+		if(leftDis<80)
+		{
+			IplImage* handImageLeft=getConnextImage(binaryImage,theBox+4*(leftMinIdx-1),leftMinIdx,frameID);
+			saveHandImage(handImageLeft,frameID, LEFT, Point(*(theBox+4*(leftMinIdx-1)),*(theBox+4*(leftMinIdx-1)+1)) ,fs);
+			cvReleaseImage(&handImageLeft);
+		}
+		if(rightDis<80)
+		{
+			IplImage* handImageRight=getConnextImage(binaryImage,theBox+4*(rightMinIdx-1),rightMinIdx,frameID);
+			saveHandImage(handImageRight,frameID, RIGHT, Point(*(theBox+4*(rightMinIdx-1)),*(theBox+4*(rightMinIdx-1)+1)) ,fs);
+			cvReleaseImage(&handImageRight);
+		}
+		
+	}
+}
+
+IplImage* S_Keyframe::getConnextImage(IplImage* binaryImage,int* theBox,int connIdx,int frameID)
+{
+	CvRect ConnexeRect = cvRect(theBox[0],theBox[1],theBox[2]-theBox[0],theBox[3]-theBox[1]);
+	cvSetImageROI(vColorData[frameID%bufferSize],ConnexeRect);
+	IplImage* colorOutput=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,vColorData[frameID%bufferSize]->nChannels);
+	cvCopy(vColorData[frameID%bufferSize],colorOutput);
+	cvResetImageROI(vColorData[frameID%bufferSize]);
+	cvCvtColor(colorOutput,colorOutput,CV_BGR2HSV);
+	IplImage* equalizeImageH=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
+	IplImage* equalizeImageS=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
+	IplImage* equalizeImageV=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
+	cvSplit(colorOutput,equalizeImageH,equalizeImageS,equalizeImageV,NULL);
+	cvEqualizeHist(equalizeImageV,equalizeImageV);
+	cvMerge(equalizeImageH,equalizeImageS,equalizeImageV,NULL,colorOutput);
+	//cvSetImageROI(grayImage,ConnexeRect);
+	IplImage* outputImage = cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),binaryImage->depth,binaryImage->nChannels);
+	//	IplImage* resizeImage = cvCreateImage(cvSize(64,64),grayImage->depth,grayImage->nChannels);
+	//cvCopy(grayImage,outputImage);
+	//cvResetImageROI(grayImage);
+	cvCvtColor(colorOutput,colorOutput,CV_HSV2BGR);
+	cvCvtColor(colorOutput,outputImage,CV_RGB2GRAY);
+	cvReleaseImage(&colorOutput);
+	cvReleaseImage(&equalizeImageH);
+	cvReleaseImage(&equalizeImageS);
+	cvReleaseImage(&equalizeImageV);
+
+//	if (useSegW == 1)
+	{
+		for(int i=0;i<outputImage->height;i++)
+		{
+			for(int j=0;j<outputImage->width;j++)
+			{
+				int s=((u8*)(binaryImage->imageData + binaryImage->widthStep*(i+theBox[1])))[j+theBox[0]];
+				if(s!=connIdx)
+					((u8*)(outputImage->imageData + outputImage->widthStep*i))[j]=0;
+			}
+		}
+	}
+	
+	//	cvResize(outputImage,resizeImage);
+	//	cvSmooth(resizeImage,resizeImage);
+	//	cvReleaseImage(&outputImage);
+	//	return resizeImage;
+	return outputImage;
+}
+
 void S_Keyframe::saveHandImage(IplImage* handImage, int frameID, HANDTYPE hType, Point coor)
 {
 	//if(hType == LEFT)
@@ -2063,6 +2288,7 @@ void S_Keyframe::saveHandImage(IplImage* handImage, int frameID, HANDTYPE hType,
 		fs.leftCoor[0]=coor.x;
 		fs.leftCoor[1]=coor.y;
 		fs.leftImage=cvCloneImage(handImage);
+		fs.leftDepth=getDepth(frameID,handImage,coor);
 		return;
 	}
 
@@ -2074,6 +2300,7 @@ void S_Keyframe::saveHandImage(IplImage* handImage, int frameID, HANDTYPE hType,
 		fs.rightCoor[0]=coor.x;
 		fs.rightCoor[1]=coor.y;
 		fs.rightImage=cvCloneImage(handImage);
+		fs.rightDepth=getDepth(frameID,handImage,coor);
 		return;
 	}
 
@@ -2086,6 +2313,7 @@ void S_Keyframe::saveHandImage(IplImage* handImage, int frameID, HANDTYPE hType,
 		fs.bothCoor[0]=coor.x;
 		fs.bothCoor[1]=coor.y;
 		fs.bothImage=cvCloneImage(handImage);
+		fs.bothDepth=getDepth(frameID,handImage,coor);
 		return;
 	}
 }
@@ -2093,38 +2321,42 @@ void S_Keyframe::saveHandImage(IplImage* handImage, int frameID, HANDTYPE hType,
 IplImage* S_Keyframe::getConnextImage(IplImage* grayImage,IplImage* binaryImage,int* theBox,int connIdx,int frameID)
 {
 	CvRect ConnexeRect = cvRect(theBox[0],theBox[1],theBox[2]-theBox[0],theBox[3]-theBox[1]);
-	cvSetImageROI(vColorData[frameID%bufferSize],ConnexeRect);
-	IplImage* colorOutput=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,vColorData[frameID%bufferSize]->nChannels);
-	cvCopy(vColorData[frameID%bufferSize],colorOutput);
-	cvResetImageROI(vColorData[frameID%bufferSize]);
-	cvCvtColor(colorOutput,colorOutput,CV_BGR2HSV);
-	IplImage* equalizeImageH=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
-	IplImage* equalizeImageS=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
-	IplImage* equalizeImageV=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
-	cvSplit(colorOutput,equalizeImageH,equalizeImageS,equalizeImageV,NULL);
-	cvEqualizeHist(equalizeImageV,equalizeImageV);
-	cvMerge(equalizeImageH,equalizeImageS,equalizeImageV,NULL,colorOutput);
-	//cvSetImageROI(grayImage,ConnexeRect);
+// 	cvSetImageROI(vColorData[frameID%bufferSize],ConnexeRect);
+// 	IplImage* colorOutput=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,vColorData[frameID%bufferSize]->nChannels);
+// 	cvCopy(vColorData[frameID%bufferSize],colorOutput);
+// 	cvResetImageROI(vColorData[frameID%bufferSize]);
+// 	cvCvtColor(colorOutput,colorOutput,CV_BGR2HSV);
+// 	IplImage* equalizeImageH=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
+// 	IplImage* equalizeImageS=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
+// 	IplImage* equalizeImageV=cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),vColorData[frameID%bufferSize]->depth,1);
+// 	cvSplit(colorOutput,equalizeImageH,equalizeImageS,equalizeImageV,NULL);
+// 	cvEqualizeHist(equalizeImageV,equalizeImageV);
+// 	cvMerge(equalizeImageH,equalizeImageS,equalizeImageV,NULL,colorOutput);
+	cvSetImageROI(grayImage,ConnexeRect);
 	IplImage* outputImage = cvCreateImage(cvSize(ConnexeRect.width,ConnexeRect.height),grayImage->depth,grayImage->nChannels);
 //	IplImage* resizeImage = cvCreateImage(cvSize(64,64),grayImage->depth,grayImage->nChannels);
-	//cvCopy(grayImage,outputImage);
-	//cvResetImageROI(grayImage);
-	cvCvtColor(colorOutput,colorOutput,CV_HSV2BGR);
-	cvCvtColor(colorOutput,outputImage,CV_RGB2GRAY);
-	cvReleaseImage(&colorOutput);
-	cvReleaseImage(&equalizeImageH);
-	cvReleaseImage(&equalizeImageS);
-	cvReleaseImage(&equalizeImageV);
+	cvCopy(grayImage,outputImage);
+	cvResetImageROI(grayImage);
+// 	cvCvtColor(colorOutput,colorOutput,CV_HSV2BGR);
+// 	cvCvtColor(colorOutput,outputImage,CV_RGB2GRAY);
+// 	cvReleaseImage(&colorOutput);
+// 	cvReleaseImage(&equalizeImageH);
+// 	cvReleaseImage(&equalizeImageS);
+// 	cvReleaseImage(&equalizeImageV);
 
-	//for(int i=0;i<outputImage->height;i++)
-	//{
-	//	for(int j=0;j<outputImage->width;j++)
-	//	{
-	//		int s=((u8*)(binaryImage->imageData + binaryImage->widthStep*(i+theBox[1])))[j+theBox[0]];
-	//		if(s!=connIdx)
-	//			((u8*)(outputImage->imageData + outputImage->widthStep*i))[j]=0;
-	//	}
-	//}
+//	if (useSegW == 1)
+	{
+		for(int i=0;i<outputImage->height;i++)
+		{
+			for(int j=0;j<outputImage->width;j++)
+			{
+				int s=((u8*)(binaryImage->imageData + binaryImage->widthStep*(i+theBox[1])))[j+theBox[0]];
+				if(s!=connIdx)
+					((u8*)(outputImage->imageData + outputImage->widthStep*i))[j]=0;
+			}
+		}
+	}
+
 //	cvResize(outputImage,resizeImage);
 //	cvSmooth(resizeImage,resizeImage);
 //	cvReleaseImage(&outputImage);
@@ -2338,54 +2570,7 @@ void S_Keyframe::saveHandStruct(string filePath,HandSegment right,HandSegment le
 	}
 }
 
-void S_Keyframe::saveKeyFrameSegment(string filePath)
-{
-	const char* filePathChar=filePath.c_str();
-	mkdir(filePathChar);
-
-	for(int i=0;i<v_kfSegment.size();i++)
-	{
-		if(v_kfSegment[i].BothLabel==1)
-		{
-			for(int j=0;j<v_kfSegment[i].BothNum;j++)
-			{
-				char filePathName[100];
-				char fileNameNum[100];
-				sprintf(fileNameNum,"\\%03d_%03d_Both_%03d.jpg",i,v_kfSegment[i].BothID[j],j);
-				strcpy(filePathName,filePathChar);
-				strcat(filePathName,fileNameNum);
-				cvSaveImage(filePathName,v_kfSegment[i].BothImages[j]);
-			}
-			continue;
-		}
-		if(v_kfSegment[i].LeftLabel==1)
-		{
-			for(int j=0;j<v_kfSegment[i].LeftNum;j++)
-			{
-				char filePathName[100];
-				char fileNameNum[100];
-				sprintf(fileNameNum,"\\%03d_%03d_Left_%03d.jpg",i,v_kfSegment[i].LeftID[j],j);
-				strcpy(filePathName,filePathChar);
-				strcat(filePathName,fileNameNum);
-				cvSaveImage(filePathName,v_kfSegment[i].LeftImages[j]);
-			}
-		}
-		if(v_kfSegment[i].RightLabel==1)
-		{
-			for(int j=0;j<v_kfSegment[i].RightNum;j++)
-			{
-				char filePathName[100];
-				char fileNameNum[100];
-				sprintf(fileNameNum,"\\%03d_%03d_Right_%03d.jpg",i,v_kfSegment[i].RightID[j],j);
-				strcpy(filePathName,filePathChar);
-				strcat(filePathName,fileNameNum);
-				cvSaveImage(filePathName,v_kfSegment[i].RightImages[j]);
-			}
-		}
-	}
-}
-
-void S_Keyframe::saveKeyFrameSegment(string filePath,vector<KeyFrameSegment> vKeyFrame)
+void S_Keyframe::saveKeyFrameSegment(string filePath, vector<KeyFrameSegment> v_kfSegment)
 {
 	const char* filePathChar=filePath.c_str();
 	mkdir(filePathChar);
@@ -2414,55 +2599,55 @@ void S_Keyframe::saveKeyFrameSegment(string filePath,vector<KeyFrameSegment> vKe
 	int leftIdx[1000];
 
 	int i,j;
-	for(i=0;i<vKeyFrame.size();i++)
+	for(i=0;i<v_kfSegment.size();i++)
 	{
-		if(vKeyFrame[i].BothLabel==1)
+		if(v_kfSegment[i].BothLabel==1)
 		{
-			for(j=0;j<vKeyFrame[i].BothNum;j++)
+			for(j=0;j<v_kfSegment[i].BothNum;j++)
 			{
 				char filePathName[100];
 				char fileNameNum[100];
-				sprintf(fileNameNum,"\\%d.jpg",vKeyFrame[i].BothID[j]);
+				sprintf(fileNameNum,"\\%d.jpg",v_kfSegment[i].BothID[j]);
 				strcpy(filePathName,bothPath);
 				strcat(filePathName,fileNameNum);
-				cvSaveImage(filePathName,vKeyFrame[i].BothImages[j]);
+				cvSaveImage(filePathName,v_kfSegment[i].BothImages[j]);
 
 			}
-			bothIdx[bothNum*2]=vKeyFrame[i].BeginFrameID;
-			bothIdx[bothNum*2+1]=vKeyFrame[i].EndFrameID;
+			bothIdx[bothNum*2]=v_kfSegment[i].BeginFrameID;
+			bothIdx[bothNum*2+1]=v_kfSegment[i].EndFrameID;
 			bothNum++;
 			continue;
 		}
-		if(vKeyFrame[i].LeftLabel==1)
+		if(v_kfSegment[i].LeftLabel==1)
 		{
-			for(j=0;j<vKeyFrame[i].LeftNum;j++)
+			for(j=0;j<v_kfSegment[i].LeftNum;j++)
 			{
 				char filePathName[100];
 				char fileNameNum[100];
-				sprintf(fileNameNum,"\\%d.jpg",vKeyFrame[i].LeftID[j]);
+				sprintf(fileNameNum,"\\%d.jpg",v_kfSegment[i].LeftID[j]);
 				strcpy(filePathName,leftPath);
 				strcat(filePathName,fileNameNum);
-				cvSaveImage(filePathName,vKeyFrame[i].LeftImages[j]);
+				cvSaveImage(filePathName,v_kfSegment[i].LeftImages[j]);
 
 			}
-			leftIdx[leftNum*2]=vKeyFrame[i].BeginFrameID;
-			leftIdx[leftNum*2+1]=vKeyFrame[i].EndFrameID;
+			leftIdx[leftNum*2]=v_kfSegment[i].BeginFrameID;
+			leftIdx[leftNum*2+1]=v_kfSegment[i].EndFrameID;
 			leftNum++;
 		}
-		if(vKeyFrame[i].RightLabel==1)
+		if(v_kfSegment[i].RightLabel==1)
 		{
-			for(j=0;j<vKeyFrame[i].RightNum;j++)
+			for(j=0;j<v_kfSegment[i].RightNum;j++)
 			{
 				char filePathName[100];
 				char fileNameNum[100];
-				sprintf(fileNameNum,"\\%d.jpg",vKeyFrame[i].RightID[j]);
+				sprintf(fileNameNum,"\\%d.jpg",v_kfSegment[i].RightID[j]);
 				strcpy(filePathName,rightPath);
 				strcat(filePathName,fileNameNum);
-				cvSaveImage(filePathName,vKeyFrame[i].RightImages[j]);
+				cvSaveImage(filePathName,v_kfSegment[i].RightImages[j]);
 
 			}
-			rightIdx[rightNum*2]=vKeyFrame[i].BeginFrameID;
-			rightIdx[rightNum*2+1]=vKeyFrame[i].EndFrameID;
+			rightIdx[rightNum*2]=v_kfSegment[i].BeginFrameID;
+			rightIdx[rightNum*2+1]=v_kfSegment[i].EndFrameID;
 			rightNum++;
 		}
 	}
@@ -2587,56 +2772,376 @@ void S_Keyframe::saveKeyFrameSegment(string filePath,vector<KeyFrameSegment> vKe
 
 	}
 
-
+	for(int i=0;i<v_kfSegment.size();i++)
+	{
+		idxFile_both<<v_kfSegment[i].BeginFrameID<<"	"<<v_kfSegment[i].EndFrameID<<endl;
+		idxFile_right<<v_kfSegment[i].BeginFrameID<<"	"<<v_kfSegment[i].EndFrameID<<endl;
+		idxFile_left<<v_kfSegment[i].BeginFrameID<<"	"<<v_kfSegment[i].EndFrameID<<endl;
+		idxFile_both<<"B"<<"	";
+		idxFile_left<<"B"<<"	";
+		idxFile_right<<"B"<<"	";
+		if(v_kfSegment[i].BothLabel==1)
+		{
+			idxFile_both<<v_kfSegment[i].BothNum<<"	"<<endl;
+			idxFile_right<<v_kfSegment[i].BothNum<<"	"<<endl;
+			idxFile_left<<v_kfSegment[i].BothNum<<"	"<<endl;
+			for(int j=0;j<v_kfSegment[i].BothNum;j++)
+			{
+				idxFile_both<<v_kfSegment[i].BothID[j]<<"	"<<v_kfSegment[i].BothCoor[j*2]+v_kfSegment[i].BothImages[j]->width/2<<"	"<<v_kfSegment[i].BothCoor[j*2+1]+v_kfSegment[i].BothImages[j]->height/2<<"	"<<v_kfSegment[i].BothDepth[j]<<endl;
+				idxFile_left<<v_kfSegment[i].BothID[j]<<"	"<<v_kfSegment[i].BothCoor[j*2]+v_kfSegment[i].BothImages[j]->width/2<<"	"<<v_kfSegment[i].BothCoor[j*2+1]+v_kfSegment[i].BothImages[j]->height/2<<"	"<<v_kfSegment[i].BothDepth[j]<<endl;
+				idxFile_right<<v_kfSegment[i].BothID[j]<<"	"<<v_kfSegment[i].BothCoor[j*2]+v_kfSegment[i].BothImages[j]->width/2<<"	"<<v_kfSegment[i].BothCoor[j*2+1]+v_kfSegment[i].BothImages[j]->height/2<<"	"<<v_kfSegment[i].BothDepth[j]<<endl;
+			}
+		}
+		else
+		{
+			idxFile_both<<"0	"<<endl;
+			idxFile_left<<"0	"<<endl;
+			idxFile_right<<"0	"<<endl;
+		}
+		idxFile_both<<"L"<<"	";
+		idxFile_left<<"L"<<"	";
+		idxFile_right<<"L"<<"	";
+		if(v_kfSegment[i].LeftLabel==1)
+		{
+			idxFile_both<<v_kfSegment[i].LeftNum<<"	"<<endl;
+			idxFile_both<<v_kfSegment[i].LeftNum<<"	"<<endl;
+			idxFile_both<<v_kfSegment[i].LeftNum<<"	"<<endl;
+			for(int j=0;j<v_kfSegment[i].LeftNum;j++)
+			{
+				idxFile_both<<v_kfSegment[i].LeftID[j]<<"	"<<v_kfSegment[i].LeftCoor[j*2]+v_kfSegment[i].LeftImages[j]->width/2<<"	"<<v_kfSegment[i].LeftCoor[j*2+1]+v_kfSegment[i].LeftImages[j]->height/2<<"	"<<v_kfSegment[i].LeftDepth[j]<<endl;
+				idxFile_left<<v_kfSegment[i].LeftID[j]<<"	"<<v_kfSegment[i].LeftCoor[j*2]+v_kfSegment[i].LeftImages[j]->width/2<<"	"<<v_kfSegment[i].LeftCoor[j*2+1]+v_kfSegment[i].LeftImages[j]->height/2<<"	"<<v_kfSegment[i].LeftDepth[j]<<endl;
+				idxFile_right<<v_kfSegment[i].LeftID[j]<<"	"<<v_kfSegment[i].LeftCoor[j*2]+v_kfSegment[i].LeftImages[j]->width/2<<"	"<<v_kfSegment[i].LeftCoor[j*2+1]+v_kfSegment[i].LeftImages[j]->height/2<<"	"<<v_kfSegment[i].LeftDepth[j]<<endl;
+			}
+		}
+		else
+		{
+			idxFile_both<<"0	"<<endl;
+			idxFile_left<<"0	"<<endl;
+			idxFile_right<<"0	"<<endl;
+		}
+		idxFile_both<<"R"<<"	";
+		idxFile_right<<"R"<<"	";
+		idxFile_left<<"R"<<"	";
+		if(v_kfSegment[i].RightLabel==1)
+		{
+			idxFile_both<<v_kfSegment[i].RightNum<<"	"<<endl;
+			idxFile_left<<v_kfSegment[i].RightNum<<"	"<<endl;
+			idxFile_right<<v_kfSegment[i].RightNum<<"	"<<endl;
+			for(int j=0;j<v_kfSegment[i].RightNum;j++)
+			{
+				idxFile_both<<v_kfSegment[i].RightID[j]<<"	"<<v_kfSegment[i].RightCoor[j*2]+v_kfSegment[i].RightImages[j]->width/2<<"	"<<v_kfSegment[i].RightCoor[j*2+1]+v_kfSegment[i].RightImages[j]->height/2<<"	"<<v_kfSegment[i].RightDepth[j]<<endl;
+				idxFile_left<<v_kfSegment[i].RightID[j]<<"	"<<v_kfSegment[i].RightCoor[j*2]+v_kfSegment[i].RightImages[j]->width/2<<"	"<<v_kfSegment[i].RightCoor[j*2+1]+v_kfSegment[i].RightImages[j]->height/2<<"	"<<v_kfSegment[i].RightDepth[j]<<endl;
+				idxFile_right<<v_kfSegment[i].RightID[j]<<"	"<<v_kfSegment[i].RightCoor[j*2]+v_kfSegment[i].RightImages[j]->width/2<<"	"<<v_kfSegment[i].RightCoor[j*2+1]+v_kfSegment[i].RightImages[j]->height/2<<"	"<<v_kfSegment[i].RightDepth[j]<<endl;
+			}
+		}
+		else
+		{
+			idxFile_both<<"0	"<<endl;
+			idxFile_left<<"0	"<<endl;
+			idxFile_right<<"0	"<<endl;
+		}
+	}
 
 	idxFile_right.close();
 	idxFile_left.close();
 	idxFile_both.close();
-
 // 	const char* filePathChar=filePath.c_str();
 // 	mkdir(filePathChar);
 // 
-// 	for(int i=0;i<vKeyFrame.size();i++)
+// 	for(int i=0;i<v_kfSegment.size();i++)
 // 	{
-// 		if(vKeyFrame[i].BothLabel==1)
+// 		if(v_kfSegment[i].BothLabel==1)
 // 		{
-// 			for(int j=0;j<vKeyFrame[i].BothNum;j++)
+// 			for(int j=0;j<v_kfSegment[i].BothNum;j++)
 // 			{
 // 				char filePathName[100];
 // 				char fileNameNum[100];
-// 				sprintf(fileNameNum,"\\%03d_%03d_Both_%03d.jpg",i,vKeyFrame[i].BothID[j],j);
+// 				sprintf(fileNameNum,"\\%03d_%03d_Both_%03d.jpg",i,v_kfSegment[i].BothID[j],j);
 // 				strcpy(filePathName,filePathChar);
 // 				strcat(filePathName,fileNameNum);
-// 				cvSaveImage(filePathName,vKeyFrame[i].BothImages[j]);
+// 				cvSaveImage(filePathName,v_kfSegment[i].BothImages[j]);
 // 			}
 // 			continue;
 // 		}
-// 		if(vKeyFrame[i].LeftLabel==1)
+// 		if(v_kfSegment[i].LeftLabel==1)
 // 		{
-// 			for(int j=0;j<vKeyFrame[i].LeftNum;j++)
+// 			for(int j=0;j<v_kfSegment[i].LeftNum;j++)
 // 			{
 // 				char filePathName[100];
 // 				char fileNameNum[100];
-// 				sprintf(fileNameNum,"\\%03d_%03d_Left_%03d.jpg",i,vKeyFrame[i].LeftID[j],j);
+// 				sprintf(fileNameNum,"\\%03d_%03d_Left_%03d.jpg",i,v_kfSegment[i].LeftID[j],j);
 // 				strcpy(filePathName,filePathChar);
 // 				strcat(filePathName,fileNameNum);
-// 				cvSaveImage(filePathName,vKeyFrame[i].LeftImages[j]);
+// 				cvSaveImage(filePathName,v_kfSegment[i].LeftImages[j]);
 // 			}
 // 		}
-// 		if(vKeyFrame[i].RightLabel==1)
+// 		if(v_kfSegment[i].RightLabel==1)
 // 		{
-// 			for(int j=0;j<vKeyFrame[i].RightNum;j++)
+// 			for(int j=0;j<v_kfSegment[i].RightNum;j++)
 // 			{
 // 				char filePathName[100];
 // 				char fileNameNum[100];
-// 				sprintf(fileNameNum,"\\%03d_%03d_Right_%03d.jpg",i,vKeyFrame[i].RightID[j],j);
+// 				sprintf(fileNameNum,"\\%03d_%03d_Right_%03d.jpg",i,v_kfSegment[i].RightID[j],j);
 // 				strcpy(filePathName,filePathChar);
 // 				strcat(filePathName,fileNameNum);
-// 				cvSaveImage(filePathName,vKeyFrame[i].RightImages[j]);
+// 				cvSaveImage(filePathName,v_kfSegment[i].RightImages[j]);
 // 			}
 // 		}
 // 	}
 }
+
+// void S_Keyframe::saveKeyFrameSegment(string filePath,vector<KeyFrameSegment> vKeyFrame)
+// {
+// 	const char* filePathChar=filePath.c_str();
+// 	mkdir(filePathChar);
+// 	char bothPath[100];
+// 	char leftPath[100];
+// 	char rightPath[100];
+// 	strcpy(bothPath,filePathChar);
+// 	strcat(bothPath,"\\KeyPosture");
+// 	mkdir(bothPath);
+// 	strcat(bothPath,"\\Both");
+// 	mkdir(bothPath);
+// 	strcpy(rightPath,filePathChar);
+// 	strcat(rightPath,"\\KeyPosture");
+// 	strcat(rightPath,"\\Right");
+// 	mkdir(rightPath);
+// 	strcpy(leftPath,filePathChar);
+// 	strcat(leftPath,"\\KeyPosture");
+// 	strcat(leftPath,"\\Left");
+// 	mkdir(leftPath);
+// 
+// 	int bothNum=0;
+// 	int rightNum=0;
+// 	int leftNum=0;
+// 	int bothIdx[1000];
+// 	int rightIdx[1000];
+// 	int leftIdx[1000];
+// 
+// 	int i,j;
+// 	for(i=0;i<vKeyFrame.size();i++)
+// 	{
+// 		if(vKeyFrame[i].BothLabel==1)
+// 		{
+// 			for(j=0;j<vKeyFrame[i].BothNum;j++)
+// 			{
+// 				char filePathName[100];
+// 				char fileNameNum[100];
+// 				sprintf(fileNameNum,"\\%d.jpg",vKeyFrame[i].BothID[j]);
+// 				strcpy(filePathName,bothPath);
+// 				strcat(filePathName,fileNameNum);
+// 				cvSaveImage(filePathName,vKeyFrame[i].BothImages[j]);
+// 
+// 			}
+// 			bothIdx[bothNum*2]=vKeyFrame[i].BeginFrameID;
+// 			bothIdx[bothNum*2+1]=vKeyFrame[i].EndFrameID;
+// 			bothNum++;
+// 			continue;
+// 		}
+// 		if(vKeyFrame[i].LeftLabel==1)
+// 		{
+// 			for(j=0;j<vKeyFrame[i].LeftNum;j++)
+// 			{
+// 				char filePathName[100];
+// 				char fileNameNum[100];
+// 				sprintf(fileNameNum,"\\%d.jpg",vKeyFrame[i].LeftID[j]);
+// 				strcpy(filePathName,leftPath);
+// 				strcat(filePathName,fileNameNum);
+// 				cvSaveImage(filePathName,vKeyFrame[i].LeftImages[j]);
+// 
+// 			}
+// 			leftIdx[leftNum*2]=vKeyFrame[i].BeginFrameID;
+// 			leftIdx[leftNum*2+1]=vKeyFrame[i].EndFrameID;
+// 			leftNum++;
+// 		}
+// 		if(vKeyFrame[i].RightLabel==1)
+// 		{
+// 			for(j=0;j<vKeyFrame[i].RightNum;j++)
+// 			{
+// 				char filePathName[100];
+// 				char fileNameNum[100];
+// 				sprintf(fileNameNum,"\\%d.jpg",vKeyFrame[i].RightID[j]);
+// 				strcpy(filePathName,rightPath);
+// 				strcat(filePathName,fileNameNum);
+// 				cvSaveImage(filePathName,vKeyFrame[i].RightImages[j]);
+// 
+// 			}
+// 			rightIdx[rightNum*2]=vKeyFrame[i].BeginFrameID;
+// 			rightIdx[rightNum*2+1]=vKeyFrame[i].EndFrameID;
+// 			rightNum++;
+// 		}
+// 	}
+// 
+// 	int maxIndex = 0;
+// 	for (i=0;i<rightNum;i++)
+// 	{
+// 		if (rightIdx[i*2]>maxIndex)
+// 		{
+// 			maxIndex = rightIdx[i*2];
+// 		}
+// 	}
+// 	for(i=0;i<leftNum;i++)
+// 	{
+// 		if (leftIdx[i*2]>maxIndex)
+// 		{
+// 			maxIndex = leftIdx[i*2];
+// 		}
+// 	}
+// 	for(i=0;i<bothNum;i++)
+// 	{
+// 		if (bothIdx[i*2]>maxIndex)
+// 		{
+// 			maxIndex = bothIdx[i*2];
+// 		}
+// 	}
+// 
+// 	int alll = 0;
+// 	for (i=0; i<maxIndex+1; i++)
+// 	{
+// 		bool overrid = false;
+// 		for (j=0; j<rightNum; j++)
+// 		{
+// 			if (rightIdx[j*2] == i && !overrid)
+// 			{
+// 				alll++;
+// 				overrid = true;
+// 				break;
+// 			}
+// 
+// 		}
+// 		for (j=0; j<leftNum;j++)
+// 		{
+// 			if (leftIdx[j*2] == i && !overrid)
+// 			{
+// 				alll++;
+// 				overrid = true;
+// 				break;
+// 			}
+// 
+// 		}
+// 		for (j=0; j<bothNum; j++)
+// 		{
+// 			if (bothIdx[j*2] == i && !overrid)
+// 			{
+// 				alll++;
+// 				overrid = true;
+// 				break;
+// 			}
+// 
+// 		}
+// 	}
+// 
+// 
+// 
+// 	fstream idxFile_right;
+// 	strcat(rightPath,"\\right.txt");
+// 	idxFile_right.open(rightPath,ios::out);
+// 
+// 	fstream idxFile_left;
+// 	strcat(leftPath,"\\left.txt");
+// 	idxFile_left.open(leftPath,ios::out);
+// 
+// 	fstream idxFile_both;
+// 	strcat(bothPath,"\\both.txt");
+// 	idxFile_both.open(bothPath,ios::out);
+// 
+// 	idxFile_right<<alll<<endl;
+// 	idxFile_left<<alll<<endl;
+// 	idxFile_both<<alll<<endl;
+// 
+// 
+// 	for (i=0; i<maxIndex+1; i++)
+// 	{
+// 		bool overrid = false;
+// 		for (j=0; j<rightNum; j++)
+// 		{
+// 			if (rightIdx[j*2] == i && !overrid)
+// 			{
+// 				idxFile_right<<rightIdx[j*2]<<"	"<<rightIdx[j*2+1]<<endl;
+// 				idxFile_left<<rightIdx[j*2]<<"	"<<rightIdx[j*2+1]<<endl;
+// 				idxFile_both<<rightIdx[j*2]<<"	"<<rightIdx[j*2+1]<<endl;
+// 				overrid = true;
+// 				break;
+// 			}
+// 
+// 		}
+// 		for (j=0; j<leftNum;j++)
+// 		{
+// 			if (leftIdx[j*2] == i && !overrid)
+// 			{
+// 				idxFile_right<<leftIdx[j*2]<<"	"<<leftIdx[j*2+1]<<endl;
+// 				idxFile_left<<leftIdx[j*2]<<"	"<<leftIdx[j*2+1]<<endl;
+// 				idxFile_both<<leftIdx[j*2]<<"	"<<leftIdx[j*2+1]<<endl;
+// 				overrid = true;
+// 				break;
+// 			}
+// 
+// 		}
+// 		for (j=0; j<bothNum; j++)
+// 		{
+// 			if (bothIdx[j*2] == i && !overrid)
+// 			{
+// 				idxFile_right<<bothIdx[j*2]<<"	"<<bothIdx[j*2+1]<<endl;
+// 				idxFile_left<<bothIdx[j*2]<<"	"<<bothIdx[j*2+1]<<endl;
+// 				idxFile_both<<bothIdx[j*2]<<"	"<<bothIdx[j*2+1]<<endl;
+// 				overrid = true;
+// 				break;
+// 			}
+// 
+// 		}
+// 
+// 	}
+// 
+// 
+// 
+// 	idxFile_right.close();
+// 	idxFile_left.close();
+// 	idxFile_both.close();
+// 
+// // 	const char* filePathChar=filePath.c_str();
+// // 	mkdir(filePathChar);
+// // 
+// // 	for(int i=0;i<vKeyFrame.size();i++)
+// // 	{
+// // 		if(vKeyFrame[i].BothLabel==1)
+// // 		{
+// // 			for(int j=0;j<vKeyFrame[i].BothNum;j++)
+// // 			{
+// // 				char filePathName[100];
+// // 				char fileNameNum[100];
+// // 				sprintf(fileNameNum,"\\%03d_%03d_Both_%03d.jpg",i,vKeyFrame[i].BothID[j],j);
+// // 				strcpy(filePathName,filePathChar);
+// // 				strcat(filePathName,fileNameNum);
+// // 				cvSaveImage(filePathName,vKeyFrame[i].BothImages[j]);
+// // 			}
+// // 			continue;
+// // 		}
+// // 		if(vKeyFrame[i].LeftLabel==1)
+// // 		{
+// // 			for(int j=0;j<vKeyFrame[i].LeftNum;j++)
+// // 			{
+// // 				char filePathName[100];
+// // 				char fileNameNum[100];
+// // 				sprintf(fileNameNum,"\\%03d_%03d_Left_%03d.jpg",i,vKeyFrame[i].LeftID[j],j);
+// // 				strcpy(filePathName,filePathChar);
+// // 				strcat(filePathName,fileNameNum);
+// // 				cvSaveImage(filePathName,vKeyFrame[i].LeftImages[j]);
+// // 			}
+// // 		}
+// // 		if(vKeyFrame[i].RightLabel==1)
+// // 		{
+// // 			for(int j=0;j<vKeyFrame[i].RightNum;j++)
+// // 			{
+// // 				char filePathName[100];
+// // 				char fileNameNum[100];
+// // 				sprintf(fileNameNum,"\\%03d_%03d_Right_%03d.jpg",i,vKeyFrame[i].RightID[j],j);
+// // 				strcpy(filePathName,filePathChar);
+// // 				strcat(filePathName,fileNameNum);
+// // 				cvSaveImage(filePathName,vKeyFrame[i].RightImages[j]);
+// // 			}
+// // 		}
+// // 	}
+// }
 
 bool S_Keyframe::mergeFragment(KeyFrameSegment &Fragment)
 {
@@ -2782,14 +3287,17 @@ void S_Keyframe::releaseFragment(KeyFrameSegment& fs)
 	delete[] fs.BothCoor;
 	delete[] fs.BothID;
 	delete[] fs.BothImages;
+	delete[] fs.BothDepth;
 
 	delete[] fs.LeftCoor;
 	delete[] fs.LeftID;
 	delete[] fs.LeftImages;
+	delete[] fs.LeftDepth;
 
 	delete[] fs.RightCoor;
 	delete[] fs.RightID;
 	delete[] fs.RightImages;
+	delete[] fs.RightDepth;
 }
 
 bool S_Keyframe::isThereFragment()
@@ -2893,11 +3401,11 @@ KeyFrameSegment S_Keyframe::getFragment()
 
 bool S_Keyframe::isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragment2,int index)
 {
-	IplImage * ori_img=cvCreateImage( cvSize(SIZE,SIZE),8,1);;//原始图像
-	IplImage * avg_img=cvCreateImage( cvSize(SIZE,SIZE),8,1);//均值图像
+	IplImage * ori_img=cvCreateImage( cvSize(SIZEs,SIZEs),8,1);;//原始图像
+	IplImage * avg_img=cvCreateImage( cvSize(SIZEs,SIZEs),8,1);//均值图像
 	uchar *pp;
 	uchar *qq;
-	int Img_sum[SIZE][SIZE];//用于图像求和
+	int Img_sum[SIZEs][SIZEs];//用于图像求和
 	memset( Img_sum,0,sizeof(Img_sum) );//先清零
 	int k;
 	int m,n;
@@ -2908,19 +3416,19 @@ bool S_Keyframe::isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragme
 		for(k=0;k<Fragment1.RightNum;k++)
 		{
 			cvResize(Fragment1.RightImages[k],ori_img);
-			for(m=0;m<SIZE;m++)
+			for(m=0;m<SIZEs;m++)
 			{
 				pp=(uchar *)(ori_img->imageData+m*ori_img->widthStep);
-				for(n=0;n<SIZE;n++)
+				for(n=0;n<SIZEs;n++)
 				{
 					Img_sum[m][n]+=pp[n*ori_img->nChannels];
 				}
 			}
 		}
-		for(m=0;m<SIZE;m++)
+		for(m=0;m<SIZEs;m++)
 		{
 			qq=(uchar *)(avg_img->imageData+m*avg_img->widthStep);
-			for(n=0;n<SIZE;n++)
+			for(n=0;n<SIZEs;n++)
 			{
 				Img_sum[m][n]=Img_sum[m][n]/Fragment1.RightNum;
 				qq[n*avg_img->nChannels]=Img_sum[m][n];
@@ -2943,19 +3451,19 @@ bool S_Keyframe::isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragme
 		for(k=0;k<Fragment2.RightNum;k++)
 		{
 			cvResize(Fragment2.RightImages[k],ori_img);
-			for(m=0;m<SIZE;m++)
+			for(m=0;m<SIZEs;m++)
 			{
 				pp=(uchar *)(ori_img->imageData+m*ori_img->widthStep);
-				for(n=0;n<SIZE;n++)
+				for(n=0;n<SIZEs;n++)
 				{
 					Img_sum[m][n]+=pp[n*ori_img->nChannels];
 				}
 			}
 		}
-		for(m=0;m<SIZE;m++)
+		for(m=0;m<SIZEs;m++)
 		{
 			qq=(uchar *)(avg_img->imageData+m*avg_img->widthStep);
-			for(n=0;n<SIZE;n++)
+			for(n=0;n<SIZEs;n++)
 			{
 				Img_sum[m][n]=Img_sum[m][n]/Fragment2.RightNum;
 				qq[n*avg_img->nChannels]=Img_sum[m][n];
@@ -2998,19 +3506,19 @@ bool S_Keyframe::isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragme
 		for(k=0;k<Fragment1.LeftNum;k++)
 		{
 			cvResize(Fragment1.LeftImages[k],ori_img);
-			for(m=0;m<SIZE;m++)
+			for(m=0;m<SIZEs;m++)
 			{
 				pp=(uchar *)(ori_img->imageData+m*ori_img->widthStep);
-				for(n=0;n<SIZE;n++)
+				for(n=0;n<SIZEs;n++)
 				{
 					Img_sum[m][n]+=pp[n*ori_img->nChannels];
 				}
 			}
 		}
-		for(m=0;m<SIZE;m++)
+		for(m=0;m<SIZEs;m++)
 		{
 			qq=(uchar *)(avg_img->imageData+m*avg_img->widthStep);
-			for(n=0;n<SIZE;n++)
+			for(n=0;n<SIZEs;n++)
 			{
 				Img_sum[m][n]=Img_sum[m][n]/Fragment1.LeftNum;
 				qq[n*avg_img->nChannels]=Img_sum[m][n];
@@ -3033,19 +3541,19 @@ bool S_Keyframe::isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragme
 		for(k=0;k<Fragment2.LeftNum;k++)
 		{
 			cvResize(Fragment2.LeftImages[k],ori_img);
-			for(m=0;m<SIZE;m++)
+			for(m=0;m<SIZEs;m++)
 			{
 				pp=(uchar *)(ori_img->imageData+m*ori_img->widthStep);
-				for(n=0;n<SIZE;n++)
+				for(n=0;n<SIZEs;n++)
 				{
 					Img_sum[m][n]+=pp[n*ori_img->nChannels];
 				}
 			}
 		}
-		for(m=0;m<SIZE;m++)
+		for(m=0;m<SIZEs;m++)
 		{
 			qq=(uchar *)(avg_img->imageData+m*avg_img->widthStep);
-			for(n=0;n<SIZE;n++)
+			for(n=0;n<SIZEs;n++)
 			{
 				Img_sum[m][n]=Img_sum[m][n]/Fragment2.LeftNum;
 				qq[n*avg_img->nChannels]=Img_sum[m][n];
@@ -3088,19 +3596,19 @@ bool S_Keyframe::isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragme
 		for(k=0;k<Fragment1.BothNum;k++)
 		{
 			cvResize(Fragment1.BothImages[k],ori_img);
-			for(m=0;m<SIZE;m++)
+			for(m=0;m<SIZEs;m++)
 			{
 				pp=(uchar *)(ori_img->imageData+m*ori_img->widthStep);
-				for(n=0;n<SIZE;n++)
+				for(n=0;n<SIZEs;n++)
 				{
 					Img_sum[m][n]+=pp[n*ori_img->nChannels];
 				}
 			}
 		}
-		for(m=0;m<SIZE;m++)
+		for(m=0;m<SIZEs;m++)
 		{
 			qq=(uchar *)(avg_img->imageData+m*avg_img->widthStep);
-			for(n=0;n<SIZE;n++)
+			for(n=0;n<SIZEs;n++)
 			{
 				Img_sum[m][n]=Img_sum[m][n]/Fragment1.BothNum;
 				qq[n*avg_img->nChannels]=Img_sum[m][n];
@@ -3123,19 +3631,19 @@ bool S_Keyframe::isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragme
 		for(k=0;k<Fragment2.BothNum;k++)
 		{
 			cvResize(Fragment2.BothImages[k],ori_img);
-			for(m=0;m<SIZE;m++)
+			for(m=0;m<SIZEs;m++)
 			{
 				pp=(uchar *)(ori_img->imageData+m*ori_img->widthStep);
-				for(n=0;n<SIZE;n++)
+				for(n=0;n<SIZEs;n++)
 				{
 					Img_sum[m][n]+=pp[n*ori_img->nChannels];
 				}
 			}
 		}
-		for(m=0;m<SIZE;m++)
+		for(m=0;m<SIZEs;m++)
 		{
 			qq=(uchar *)(avg_img->imageData+m*avg_img->widthStep);
-			for(n=0;n<SIZE;n++)
+			for(n=0;n<SIZEs;n++)
 			{
 				Img_sum[m][n]=Img_sum[m][n]/Fragment2.BothNum;
 				qq[n*avg_img->nChannels]=Img_sum[m][n];
@@ -3207,6 +3715,7 @@ void S_Keyframe::mergeFragment(KeyFrameSegment& firstFragment,KeyFrameSegment& s
 				firstFragment.RightCoor[firstFragment.RightNum*2+1]=secondFragment.RightCoor[i*2+1];
 				firstFragment.RightID[firstFragment.RightNum]=secondFragment.RightID[i];
 				firstFragment.RightImages[firstFragment.RightNum]=cvCloneImage(secondFragment.RightImages[i]);
+				firstFragment.RightDepth[firstFragment.RightNum]=secondFragment.RightDepth[i];
 				firstFragment.EndFrameID=secondFragment.RightID[i];
 				firstFragment.RightNum++;
 			}
@@ -3226,6 +3735,7 @@ void S_Keyframe::mergeFragment(KeyFrameSegment& firstFragment,KeyFrameSegment& s
 				firstFragment.LeftCoor[firstFragment.LeftNum*2+1]=secondFragment.LeftCoor[i*2+1];
 				firstFragment.LeftID[firstFragment.LeftNum]=secondFragment.LeftID[i];
 				firstFragment.LeftImages[firstFragment.LeftNum]=cvCloneImage(secondFragment.LeftImages[i]);
+				firstFragment.LeftDepth[firstFragment.LeftNum]=secondFragment.LeftDepth[i];
 				firstFragment.EndFrameID=secondFragment.LeftID[i];
 				firstFragment.LeftNum++;
 			}
@@ -3245,6 +3755,7 @@ void S_Keyframe::mergeFragment(KeyFrameSegment& firstFragment,KeyFrameSegment& s
 				firstFragment.BothCoor[firstFragment.BothNum*2+1]=secondFragment.BothCoor[i*2+1];
 				firstFragment.BothID[firstFragment.BothNum]=secondFragment.BothID[i];
 				firstFragment.BothImages[firstFragment.BothNum]=cvCloneImage(secondFragment.BothImages[i]);
+				firstFragment.BothDepth[firstFragment.BothNum]=secondFragment.BothDepth[i];
 				firstFragment.EndFrameID=secondFragment.BothID[i];
 				firstFragment.BothNum++;
 			}
@@ -3509,4 +4020,264 @@ double S_Keyframe::coverProp(IplImage* image1,IplImage* image2)
 		}
 	}
 	return (double)intescPix/(double)unionPix;
+}
+
+void S_Keyframe::depthFloodFill(IplImage* maskImage,Mat depthMat,CvPoint seed)
+{
+	fstream floodfilllog;
+	floodfilllog.open("floodlog.txt",ios::out | ios::app);
+	
+	
+
+	floodFillX[0]=seed.x;
+	floodFillY[0]=seed.y;
+	floodFillIdx=1;
+	while(floodFillIdx > 0)
+	{
+		floodfilllog<<floodFillIdx<<"	"<<floodFillX[floodFillIdx-1]<<"	"<<floodFillY[floodFillIdx-1]<<endl;
+		if(floodFillX[floodFillIdx-1]>0)
+		{
+			if(((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]-1] == 0)
+				if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]-1) )
+					|| (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]-1) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+				{
+					((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]-1] = 255;
+					floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1]-1;
+					floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1];
+					floodFillIdx++;
+					continue;
+				}
+		}
+		if(floodFillY[floodFillIdx-1]>0)
+		{
+			if(((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]-1)))[floodFillX[floodFillIdx-1]] == 0)
+				if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1]-1,floodFillX[floodFillIdx-1]) )
+					|| (depthMat.at<u16>(floodFillY[floodFillIdx-1]-1,floodFillX[floodFillIdx-1]) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+				{
+					((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]-1)))[floodFillX[floodFillIdx-1]] = 255;
+					floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1];
+					floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1]-1;
+					floodFillIdx++;
+					continue;
+				}
+		}
+		if(floodFillX[floodFillIdx-1] < maskImage->width-1)
+		{
+			if(((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]+1] == 0)
+				if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]+1) )
+					|| (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]+1) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+				{
+					((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]+1] = 255;
+					floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1]+1;
+					floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1];
+					floodFillIdx++;
+					continue;
+				}
+		}
+		if(floodFillY[floodFillIdx-1] < maskImage->height-1)
+		{
+			if(((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]+1)))[floodFillX[floodFillIdx-1]] == 0)
+				if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1]+1,floodFillX[floodFillIdx-1]) )
+					|| (depthMat.at<u16>(floodFillY[floodFillIdx-1]+1,floodFillX[floodFillIdx-1]) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+				{
+					((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]+1)))[floodFillX[floodFillIdx-1]] = 255;
+					floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1];
+					floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1]+1;
+					floodFillIdx++;
+					continue;
+				}
+		}
+		floodFillIdx--;
+	}
+	floodfilllog.close();
+}
+
+CvHistogram* S_Keyframe::getSkinColorHist(IplImage* faceImage)
+{
+	IplImage* newFaceImage=cvCreateImage(cvSize(faceImage->width/5*3,faceImage->height/5*3),faceImage->depth,faceImage->nChannels);
+	cvSetImageROI(faceImage,cvRect(faceImage->width/5,faceImage->height/5,faceImage->width/5*3,faceImage->height/5*3));
+	//cvCopyImage(faceImage,newFaceImage);
+	cvResetImageROI(faceImage);
+	IplImage* faceHsv = cvCreateImage( cvGetSize(newFaceImage), 8, 3 ); 
+	cvCvtColor( newFaceImage, faceHsv, CV_BGR2HSV );
+	IplImage* h_plane  = cvCreateImage( cvGetSize(newFaceImage), 8, 1 );
+	IplImage* s_plane  = cvCreateImage( cvGetSize(newFaceImage), 8, 1 );
+	IplImage* v_plane  = cvCreateImage( cvGetSize(newFaceImage), 8, 1 );
+	IplImage* planes[] = { h_plane, s_plane };
+	//cvCvtPixToPlane( faceHsv, h_plane, s_plane, v_plane, 0 );
+	int h_bins = 30, s_bins = 32; 
+	CvHistogram* hist;
+	{
+		int    hist_size[] = { h_bins, s_bins };
+		float  h_ranges[]  = { 0, 180 };          // hue is [0,180]
+		float  s_ranges[]  = { 0, 255 }; 
+		float* ranges[]    = { h_ranges, s_ranges };
+		hist = cvCreateHist( 
+			2, 
+			hist_size, 
+			CV_HIST_ARRAY, 
+			ranges, 
+			1 
+			); 
+	}
+	cvCalcHist( planes, hist, 0, 0 );
+	//cvNamedWindow( "Source", 1 );
+	//cvShowImage("Source", facePic );
+	//cvWaitKey(0);
+	//cvDestroyWindow("Source");
+	cvReleaseImage(&newFaceImage);
+	cvReleaseImage(&faceHsv);
+	cvReleaseImage(&h_plane);
+	cvReleaseImage(&s_plane);
+	cvReleaseImage(&v_plane);
+	//cvReleaseImage(&planes[]);
+	return hist;
+}
+
+bool S_Keyframe::isSkinColorHist(IplImage* colorImage,int i,int j,double thres)
+{
+	if(i<2 || j<2 || i>colorImage->height-3 || j>colorImage->width-3)
+		return false;
+	int count=0;
+	IplImage* myImage=cvCreateImage(cvSize(5,5),colorImage->depth,colorImage->nChannels);
+	IplImage* myImage_size=cvCreateImage(cvSize(10,10),colorImage->depth,colorImage->nChannels);
+	CvHistogram* myHist;
+	double com=0.0;
+	cvSetImageROI(colorImage,cvRect(j-2,i-2,5,5));
+	//cvCopyImage(colorImage,myImage);
+	cvResetImageROI(colorImage);
+	cvResize(myImage, myImage_size, CV_INTER_LINEAR);
+	myHist=getSkinColorHist(myImage_size);   
+	com=cvCompareHist(skinHist,myHist,CV_COMP_CORREL);
+	cvReleaseHist(&myHist);
+	cvReleaseImage(&myImage);
+	cvReleaseImage(&myImage_size);
+	if(com > thres)
+		return true;
+	else
+		return false;
+}
+
+void S_Keyframe::skinFloodFill(IplImage* maskImage,Mat depthMat,int frameID)
+{
+	fstream floodfilllog;
+	floodfilllog.open("skinfloodlog.txt",ios::out | ios::app);
+	double skinThres=0.05;
+
+	for(int j=0;j<maskImage->width;j++)
+	{
+		for(int i=0;i<maskImage->height;i++)
+		{
+			if(((char*)(maskImage->imageData + maskImage->widthStep*i))[j] != 0)
+			{
+				floodFillX[0]=j;
+				floodFillY[0]=i;
+				floodFillIdx=1;
+			}
+			else
+				continue;
+			while(floodFillIdx > 0)
+			{
+				floodfilllog<<floodFillIdx<<"	"<<floodFillX[floodFillIdx-1]<<"	"<<floodFillY[floodFillIdx-1]<<endl;
+				if(floodFillX[floodFillIdx-1]>0)
+				{
+					if(((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]-1] == 0)
+						if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]-1) )
+							|| (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]-1) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+						{
+							if(isSkinColorHist(vColorData[frameID%bufferSize],floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]-1,skinThres))
+							{
+								((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]-1] = 255;
+								floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1]-1;
+								floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1];
+								floodFillIdx++;
+								continue;
+							}
+							
+						}
+				}
+				if(floodFillY[floodFillIdx-1]>0)
+				{
+					if(((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]-1)))[floodFillX[floodFillIdx-1]] == 0)
+						if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1]-1,floodFillX[floodFillIdx-1]) )
+							|| (depthMat.at<u16>(floodFillY[floodFillIdx-1]-1,floodFillX[floodFillIdx-1]) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+						{
+							if(isSkinColorHist(vColorData[frameID%bufferSize],floodFillY[floodFillIdx-1]-1,floodFillX[floodFillIdx-1],skinThres))
+							{
+								((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]-1)))[floodFillX[floodFillIdx-1]] = 255;
+								floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1];
+								floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1]-1;
+								floodFillIdx++;
+								continue;
+							}
+							
+						}
+				}
+				if(floodFillX[floodFillIdx-1] < maskImage->width-1)
+				{
+					if(((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]+1] == 0)
+						if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]+1) )
+							|| (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]+1) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+						{
+							if(isSkinColorHist(vColorData[frameID%bufferSize],floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]+1,skinThres))
+							{
+								((char*)(maskImage->imageData + maskImage->widthStep*floodFillY[floodFillIdx-1]))[floodFillX[floodFillIdx-1]+1] = 255;
+								floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1]+1;
+								floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1];
+								floodFillIdx++;
+								continue;
+							}
+							
+						}
+				}
+				if(floodFillY[floodFillIdx-1] < maskImage->height-1)
+				{
+					if(((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]+1)))[floodFillX[floodFillIdx-1]] == 0)
+						if( (depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) > depthMat.at<u16>(floodFillY[floodFillIdx-1]+1,floodFillX[floodFillIdx-1]) )
+							|| (depthMat.at<u16>(floodFillY[floodFillIdx-1]+1,floodFillX[floodFillIdx-1]) - depthMat.at<u16>(floodFillY[floodFillIdx-1],floodFillX[floodFillIdx-1]) < 50))
+						{
+							if(isSkinColorHist(vColorData[frameID%bufferSize],floodFillY[floodFillIdx-1]+1,floodFillX[floodFillIdx-1],skinThres))
+							{
+								((char*)(maskImage->imageData + maskImage->widthStep*(floodFillY[floodFillIdx-1]+1)))[floodFillX[floodFillIdx-1]] = 255;
+								floodFillX[floodFillIdx]=floodFillX[floodFillIdx-1];
+								floodFillY[floodFillIdx]=floodFillY[floodFillIdx-1]+1;
+								floodFillIdx++;
+								continue;
+							}
+							
+						}
+				}
+				floodFillIdx--;
+			}
+		}
+	}
+	
+	floodfilllog.close();
+}
+
+void S_Keyframe::setAll(int useSeg)
+{
+	useSegW = useSeg;
+}
+
+int S_Keyframe::getDepth(int frameID,IplImage* grayImage,Point coor)
+{
+	double sum=0;
+	int count=0;
+	for(int i=0;i<grayImage->height;i++)
+	{
+		for(int j=0;j<grayImage->width;j++)
+		{
+			if(((char*)(grayImage->imageData + grayImage->widthStep*i))[j] != 0)
+			{
+				if(vDepthData[frameID%bufferSize].at<u16>(i+coor.y,j+coor.x) > 20)
+				{
+					sum+=vDepthData[frameID%bufferSize].at<u16>(i+coor.y,j+coor.x);
+					count++;
+				}
+			}
+		}
+	}
+	sum/=count;
+	return int(sum);
 }

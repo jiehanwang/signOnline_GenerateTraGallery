@@ -189,6 +189,7 @@ public:
 	bool isFirstReadySG;
 
 	vector<int> SegEnd;
+	vector<KeyFrameSegment> v_kfSegment;
 
 	double Posture_Distance(vector<double> xx[], int x, vector<double> yy[], int y, int *pairSum);
 	int doMatch();

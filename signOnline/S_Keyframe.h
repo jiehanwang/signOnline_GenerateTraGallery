@@ -11,6 +11,7 @@
 #define consistThres	5
 #define velThres	20
 //#define heightThres	370
+#define SIZEs 64
 
 using namespace std;
 using namespace cv;
@@ -28,13 +29,19 @@ struct FrameSegment
 	IplImage* bothImage;
 	IplImage* leftImage;
 	IplImage* rightImage;
+
+
+	int bothDepth;
+	int leftDepth;
+	int rightDepth;
 };
 
 const int bufferSize=50;
 
 class S_Keyframe
 {
-	
+	int useSegW;
+	CvHistogram* skinHist;
 	int leftBegin;
 	int leftEnd;
 	int rightBegin;
@@ -52,6 +59,9 @@ class S_Keyframe
 	CRITICAL_SECTION csMessageData;
 	int bufferBeginPointer;
 	int bufferEndPointer;
+	int* floodFillX;
+	int* floodFillY;
+	int floodFillIdx;
 	
 	vector<CvPoint3D32f> rightHands;
 	vector<CvPoint3D32f> leftHands; 
@@ -82,14 +92,17 @@ class S_Keyframe
 	void getConnexeCenterBox(IplImage* image, int& nMaxRect, int* theCent, int* theBox, int& nThreshold);
 	void getHandImage(int frameID,IplImage* binaryImage, int& nMaxRect, int* theCent, int* theBox,IplImage* grayImage);
 	void getHandImage(int frameID,IplImage* binaryImage, int& nMaxRect, int* theCent, int* theBox,IplImage* grayImage,FrameSegment& fs);
-	
+	void getHandImage(int frameID,IplImage* binaryImage, int& nMaxRect, int* theCent, int* theBox,FrameSegment& fs);
 	void releaseHandStruct(HandSegment &handStruct);
 	void saveHandImage(IplImage* handImage, int frameID, HANDTYPE hType, Point coor);
 	void saveHandImage(IplImage* handImage, int frameID, HANDTYPE hType, Point coor,FrameSegment& fs);
 	IplImage* getConnextImage(IplImage* grayImage,IplImage* binaryImage,int* theBox,int connIdx,int frameID);
+	IplImage* getConnextImage(IplImage* binaryImage,int* theBox,int connIdx,int frameID);
 	bool isSkinColor(IplImage* colorImage,int i,int j);
 	bool isSkinColorModel(IplImage* colorImage,int i,int j);
+	bool isSkinColorHist(IplImage* colorImage,int i,int j,double thres);
 	void getSkinColorModel(IplImage* faceImage);
+	CvHistogram* getSkinColorHist(IplImage* faceImage);
 	bool mergeFragment(KeyFrameSegment &Fragment);
 	double coverProp(Rect leftRect,Rect rightRect, Rect bothRect);
 	void getCurrStatus(double* vel,int &beginFrame, int endFrame ,bool &currStatus,bool* flag);
@@ -103,6 +116,9 @@ class S_Keyframe
 	bool isSameFragment(KeyFrameSegment Fragment1,KeyFrameSegment Fragment2,int index);
 	double Img_distance(IplImage *dst1,IplImage *dst2);
 	double coverProp(IplImage* image1,IplImage* image2);
+	void depthFloodFill(IplImage* maskImage,Mat depthMat,CvPoint seed);
+	void skinFloodFill(IplImage* maskImage,Mat depthMat,int frameID);
+	int	getDepth(int frameID,IplImage* grayImage,Point coor);
 public:
 	int myHeightThres;
 	vector<KeyFrameSegment> v_kfSegment;
@@ -121,8 +137,8 @@ public:
 	void getFrameSegment(int frameID,FrameSegment& fs);
 	void saveHandStruct(string filePath);
 	void saveHandStruct(string filePath,HandSegment right,HandSegment left,HandSegment both);
-	void saveKeyFrameSegment(string filePath);
-	void saveKeyFrameSegment(string filePath,vector<KeyFrameSegment> vKeyFrame);
+	void saveKeyFrameSegment(string filePath, vector<KeyFrameSegment> v_kfSegment);  //*****
+	//void saveKeyFrameSegment(string filePath,vector<KeyFrameSegment> vKeyFrame);
 	void pushImageData(SLR_ST_Skeleton SkeletonData,Mat DepthData, IplImage* ColorData);
 	void KeyframeExtractionOnline();
 	void releaseMemory();
@@ -136,4 +152,5 @@ public:
 	bool getSegmentOver();
 	void deleteHandStruct(HandSegment handStruct);
 	void setHeightThres(int height);
+	void setAll(int useSeg);
 };
