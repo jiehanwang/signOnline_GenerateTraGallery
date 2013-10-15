@@ -51,6 +51,7 @@ build/
 [Oo]bj/
 posGallery/
 traGallery/
+signOnlineOutput/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
